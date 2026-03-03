@@ -5,3 +5,6 @@ Follow these instructions to set up the project and run it on your local machine
 
 ### Prerequisites
 Make sure you have the following installed on your machine:
+
+
+### Installation & Setup
