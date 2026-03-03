@@ -4,3 +4,4 @@
 Follow these instructions to set up the project and run it on your local machine for development and testing.
 
 ### Prerequisites
+Make sure you have the following installed on your machine:
