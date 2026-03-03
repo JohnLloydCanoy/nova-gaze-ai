@@ -8,3 +8,4 @@ Make sure you have the following installed on your machine:
 
 
 ### Installation & Setup
+**1. Clone the repository**
