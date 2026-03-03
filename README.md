@@ -20,3 +20,4 @@ cd amuma-ai
 ```
 ---
 
+**2. Install venv**
