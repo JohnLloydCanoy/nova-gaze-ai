@@ -18,6 +18,5 @@ git clone https://github.com/JohnLloydCanoy/nova-gaze-ai.git
 cd amuma-ai
 
 ```
-
 ---
 
