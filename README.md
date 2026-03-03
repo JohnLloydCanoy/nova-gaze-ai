@@ -29,3 +29,4 @@ python -m venv venv
 ---
 
 **3. Activate the Virtual Environment**
+Before installing any packages (like pip install requests),it need to turn the environment on.
