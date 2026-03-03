@@ -11,8 +11,6 @@ Make sure you have the following installed on your machine:
 **1. Clone the repository**
 
 Open your terminal and run the following command to clone the project to your local machine:
-
----
 ```bash
 
 git clone https://github.com/JohnLloydCanoy/nova-gaze-ai.git
