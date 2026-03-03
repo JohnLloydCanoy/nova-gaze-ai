@@ -22,3 +22,6 @@ cd amuma-ai
 
 **2. Install venv**
 
+```bash
+python -m venv venv
+```
