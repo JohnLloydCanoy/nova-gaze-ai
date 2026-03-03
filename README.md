@@ -1,5 +1,7 @@
 <div align="center">
+
 # nova-gaze-ai
+
 </div>
 
 ## 🚀 Getting Started
