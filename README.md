@@ -6,7 +6,18 @@ Follow these instructions to set up the project and run it on your local machine
 ### Prerequisites
 Make sure you have the following installed on your machine:
 
-
+---
 ### Installation & Setup
 **1. Clone the repository**
+
 Open your terminal and run the following command to clone the project to your local machine:
+
+---
+```bash
+
+git clone [https://github.com/your-username/amuma-ai.git](https://github.com/your-username/amuma-ai.git)
+cd amuma-ai
+
+```
+
+---
