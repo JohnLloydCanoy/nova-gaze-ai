@@ -1,6 +1,6 @@
 <div align="center">
 
-# nova-gaze-ai
+# Nova Gaze AI
 
 </div>
 
