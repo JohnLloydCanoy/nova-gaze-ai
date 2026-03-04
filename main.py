@@ -6,22 +6,26 @@ from app.components.tab import TopControlTab
 class NovaGazeOverlay(QMainWindow):
     def __init__(self):
         super().__init__()
-
         self.setWindowFlags(
-            Qt.FramelessWindowHint | 
-            Qt.WindowStaysOnTopHint | 
-            Qt.Tool
+            Qt.WindowType.FramelessWindowHint | 
+            Qt.WindowType.WindowStaysOnTopHint | 
+            Qt.WindowType.Tool
         )
-        self.setAttribute(Qt.WA_TranslucentBackground)
+        
+        # Make the main window completely transparent
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
-        # Set window to full screen
+        # Make the window cover the entire screen
         screen_geo = QApplication.primaryScreen().geometry()
         self.setGeometry(screen_geo)
-
-        # Initialize and position the Tab in the Top-Middle
         self.top_tab = TopControlTab(self)
-        tab_x = (screen_geo.width() // 2) - (self.top_tab.width() // 2)
-        self.top_tab.move(tab_x, 0)
+        
+        # Calculate exactly center-top
+        # Formula: (Screen Width / 2) - (Tab Width / 2)
+        center_x = (screen_geo.width() // 2) - (self.top_tab.width() // 2)
+        
+        # Move the tab to X: center, Y: 0 (very top edge)
+        self.top_tab.move(center_x, 0)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
