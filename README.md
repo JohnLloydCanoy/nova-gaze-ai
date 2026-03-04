@@ -65,4 +65,4 @@ py main.py
 
 **5. Expected Outcome**
 
-<img src="" alt="">
+<img src="" alt="Expected Outcome">
