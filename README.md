@@ -53,6 +53,12 @@ pip install -r requirements.txt
 **4.Running the program**
 
 ```bash
-pip install -r requirements.txt
+python main.py
+```
+Or
+
+
+```bash
+py main.py
 ```
 
