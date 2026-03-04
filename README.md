@@ -79,5 +79,5 @@ py main.py
 
 ---
 
-### Installation & Setup
-**1. Clone the repository**
+### UPDATE LOCAL REPOSITORY 
+**1. Pull**
