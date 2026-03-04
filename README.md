@@ -50,4 +50,5 @@ pip install -r requirements.txt
 ---
 
 
-**4. Install Requirmentst**
+**4.Running the program**
+
