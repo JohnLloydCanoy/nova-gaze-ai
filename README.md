@@ -85,3 +85,5 @@ py main.py
 ```bash
 git pull origin main
 ```
+
+**1. Create a branch for a specific feature**
