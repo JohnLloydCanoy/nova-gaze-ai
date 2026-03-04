@@ -13,6 +13,7 @@ For individuals with Amyotrophic Lateral Sclerosis (ALS) or severe motor disabil
 Instead of relying on expensive, specialized hardware, this application acts as a transparent, always-on-top layer on your desktop. It allows users to navigate interfaces, click buttons, and browse the web autonomously using intuitive eye gestures.
 
 
+
 ## 🚀 Getting Started
 Follow these instructions to set up the project and run it on your local machine for development and testing.
 
