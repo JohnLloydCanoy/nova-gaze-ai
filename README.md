@@ -81,3 +81,7 @@ py main.py
 
 ### UPDATE LOCAL REPOSITORY 
 **1. Pull**
+ 
+```bash
+git pull origin main
+```
