@@ -22,4 +22,9 @@ class NovaGazeOverlay(QMainWindow):
         self.top_tab = TopControlTab(self)
         tab_x = (screen_geo.width() // 2) - (self.top_tab.width() // 2)
         self.top_tab.move(tab_x, 0)
-        
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = NovaGazeOverlay()
+    window.show()
+    sys.exit(app.exec())
