@@ -10,4 +10,6 @@ class TopControlTab(QWidget):
             background-color: rgba(40, 40, 40, 128); /* 50% Opacity Black */
             border-bottom-left-radius: 10px;
             border-bottom-right-radius: 10px;
-        """)
+        """) 
+        
+        self.layout = QHBoxLayout(self)
