@@ -76,3 +76,5 @@ py main.py
 **5. Expected Outcome**
 
 <img src="public/documentation-1.png" alt="Expected Outcome">
+
+---
