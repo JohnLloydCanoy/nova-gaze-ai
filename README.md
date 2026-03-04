@@ -41,11 +41,10 @@ Before installing any packages (like pip install requests),it need to turn the e
 
 ---
 
-
-** 4. Install Requirments **
+**4. Install Requirments **
 
 ```bash
 pip install -r requirements.txt
 ```
-
+---
 
