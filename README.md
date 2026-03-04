@@ -89,5 +89,6 @@ git pull origin main
 **1. Create a branch for a specific feature**
 create a isolated branch for the a specific feature to be added 
 
-
+<div align="center">
 # Nova Gaze AI: Restoring digital independence, one glance at a time.
+</div>
