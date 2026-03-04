@@ -1,6 +1,7 @@
 <div align="center">
 
-# Nova Gaze AI
+# 👁️ Nova Gaze AI
+
 
 </div>
 
