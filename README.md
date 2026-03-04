@@ -62,3 +62,6 @@ Or
 py main.py
 ```
 ---
+
+**5. Expected Outcome**
+
