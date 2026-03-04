@@ -8,7 +8,7 @@
 </div>
 
 ## 📖 About the Project
-For individuals with Amyotrophic Lateral Sclerosis (ALS) or severe motor disabilities, traditional computer navigation is often impossible. 
+For individuals with Amyotrophic Lateral Sclerosis (ALS) or severe motor disabilities, traditional computer navigation is often impossible. <br>
 **Nova Gaze AI** bridges this gap by using a standard webcam and AI to track eye movements and translate them into direct screen interactions.
 
 ## 🚀 Getting Started
