@@ -22,7 +22,6 @@ class TopControlTab(QWidget):
             font-family: 'Segoe UI', Arial, sans-serif;
             letter-spacing: 1px;
         """)
-        # Add the label to the left side of the layout
         self.layout.addWidget(self.title_label) 
 
         # The spacer comes AFTER the label, pushing the Close button to the right
