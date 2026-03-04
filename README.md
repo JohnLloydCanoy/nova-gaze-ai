@@ -90,4 +90,4 @@ git pull origin main
 create a isolated branch for the a specific feature to be added 
 
 
-Nova Gaze AI: Restoring digital independence, one glance at a time.
+# Nova Gaze AI: Restoring digital independence, one glance at a time.
