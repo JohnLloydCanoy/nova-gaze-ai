@@ -14,7 +14,7 @@ class TopControlTab(QWidget):
         self.layout.setContentsMargins(15, 0, 10, 0) 
         
         # TEXT LABEL ON THE LEFT
-        self.title_label = QLabel("HELLO WORLD")
+        self.title_label = QLabel("Nova Gaze AI")
         self.title_label.setStyleSheet("""
             color: white;
             font-weight: bold;
