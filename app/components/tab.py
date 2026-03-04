@@ -13,7 +13,7 @@ class TopControlTab(QWidget):
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(15, 0, 10, 0) 
         
-        # ---> NEW: Add the Text Label here <---
+        # TEXT LABEL ON THE LEFT
         self.title_label = QLabel("HELLO WORLD")
         self.title_label.setStyleSheet("""
             color: white;
