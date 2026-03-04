@@ -28,3 +28,6 @@ class TopControlTab(QWidget):
                 background-color: red;
             }
         """)
+        self.close_btn.clicked.connect(lambda: exit())
+        
+        self.layout.addWidget(self.close_btn)
