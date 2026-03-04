@@ -36,3 +36,4 @@ if __name__ == "__main__":
     window = NovaGazeOverlay()
     window.show()
     sys.exit(app.exec())
+    
