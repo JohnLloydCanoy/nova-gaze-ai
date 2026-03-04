@@ -90,5 +90,6 @@ git pull origin main
 create a isolated branch for the a specific feature to be added 
 
 <div align="center">
+
 # Nova Gaze AI: Restoring digital independence, one glance at a time.
 </div>
