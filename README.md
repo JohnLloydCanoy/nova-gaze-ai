@@ -78,3 +78,5 @@ py main.py
 <img src="public/documentation-1.png" alt="Expected Outcome">
 
 ---
+
+### Installation & Setup
