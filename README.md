@@ -2,6 +2,7 @@
 
 # 👁️ Nova Gaze AI
 **AI-Powered Eye Tracking for Autonomous Screen Navigation**
+*Empowering individuals with ALS and severe paralysis to control their computers autonomously using only their eyes.*
 
 </div>
 
