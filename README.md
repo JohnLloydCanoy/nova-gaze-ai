@@ -9,7 +9,7 @@
 
 ## 📖 About the Project
 For individuals with Amyotrophic Lateral Sclerosis (ALS) or severe motor disabilities, traditional computer navigation is often impossible. <br>
-**Nova Gaze AI** bridges this gap by using a standard webcam and AI to track eye movements and translate them into direct screen interactions.
+**Nova Gaze AI** bridges this gap by using a standard webcam and AI to track eye movements and translate them into direct screen interactions. <br>
 Instead of relying on expensive, specialized hardware, this application acts as a transparent, always-on-top layer on your desktop. It allows users to navigate interfaces, click buttons, and browse the web autonomously using intuitive eye gestures.
 
 ## 🚀 Getting Started
