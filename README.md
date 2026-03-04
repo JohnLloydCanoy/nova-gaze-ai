@@ -1,7 +1,7 @@
 <div align="center">
 
 # 👁️ Nova Gaze AI
-
+**AI-Powered Eye Tracking for Autonomous Screen Navigation**
 
 </div>
 
