@@ -24,8 +24,12 @@ class NovaGazeOverlay(QMainWindow):
         # Formula: (Screen Width / 2) - (Tab Width / 2)
         center_x = (screen_geo.width() // 2) - (self.top_tab.width() // 2)
         
-        # Move the tab to X: center, Y: 0 (very top edge)
-        self.top_tab.move(center_x, 0)
+        # ---> THIS IS THE NEW PART <---
+        # Define the top margin (e.g., 20 pixels down from the top)
+        top_margin = 20
+        
+        # Move the tab to X: center, Y: top_margin 
+        self.top_tab.move(center_x, top_margin)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
