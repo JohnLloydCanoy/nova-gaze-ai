@@ -13,3 +13,18 @@ class TopControlTab(QWidget):
         """) 
         
         self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(10, 0, 10, 0)
+        
+        self.close_btn = QPushButton("✕ Close Program")
+        self.close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 0, 0, 150);
+                color: white;
+                border-radius: 5px;
+                font-weight: bold;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                background-color: red;
+            }
+        """)
