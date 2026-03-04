@@ -28,6 +28,7 @@ class TopControlTab(QWidget):
                 background-color: red;
             }
         """)
+        # Connect the button's clicked signal to a lambda function that exits the application
         self.close_btn.clicked.connect(lambda: exit())
         
         self.layout.addWidget(self.close_btn)
