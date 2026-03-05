@@ -22,6 +22,7 @@ class TopControlTab(QWidget):
 
         # Close Button
         self.close_btn = QPushButton("✕")
+        self.close_btn.setObjectName("close_btn")
         self.close_btn.setFixedSize(130, 30)
         self.close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         

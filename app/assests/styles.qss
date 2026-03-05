@@ -12,4 +12,9 @@ QPushButton#close_btn {
     background-color: rgba(220, 50, 50, 220);
     color: white;
     border-radius: 6px;
+    border: none;
+}
+
+QPushButton#close_btn:hover {
+    background-color: rgba(255, 0, 0, 255);
 }
