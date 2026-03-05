@@ -1,0 +1,15 @@
+TopControlTab {
+    background-color: transparent; /* Background is handled by paintEvent */
+}
+
+QLabel {
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+QPushButton#close_btn {
+    background-color: rgba(220, 50, 50, 220);
+    color: white;
+    border-radius: 6px;
+}
