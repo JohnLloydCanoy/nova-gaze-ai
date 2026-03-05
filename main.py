@@ -5,3 +5,8 @@ from app.layout import NovaGazeOverlay
 def main():
     app = QApplication(sys.argv)
     window = NovaGazeOverlay()
+    window.show()
+    sys.exit(app.exec())
+
+if __name__ == "__main__":
+    main()
