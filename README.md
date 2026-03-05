@@ -29,7 +29,7 @@ Open your terminal and run the following command to clone the project to your lo
 ```bash
 git clone https://github.com/JohnLloydCanoy/nova-gaze-ai.git
 
-cd amuma-ai
+cd nova-gaze-ai
 
 ```
 ---
