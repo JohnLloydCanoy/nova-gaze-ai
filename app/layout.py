@@ -17,3 +17,10 @@ class NovaGazeOverlay(QMainWindow):
         screen_geo = QApplication.primaryScreen().geometry()
         self.setGeometry(screen_geo)
         self.setup_components(screen_geo)
+    def setup_components(self, screen_geo):
+        """Initializes and positions all child UI components."""
+        self.top_tab = TopControlTab(self)
+        center_x = (screen_geo.width() // 2) - (self.top_tab.width() // 2)
+        top_margin = 20
+        
+        self.top_tab.move(center_x, top_margin)
