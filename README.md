@@ -90,7 +90,9 @@ git pull origin main
 create a isolated branch for the a specific feature to be added 
 Create and switch to the new branch by running this command:
 
-
+```bash
+git checkout -b feature-name
+```
 
 <div align="center">
 
