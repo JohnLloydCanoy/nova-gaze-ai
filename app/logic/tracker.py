@@ -20,6 +20,11 @@ def calculate_ear(eye_landmarks):
 
 cap = cv2.VideoCapture(0) #integrate into main.py to test
 
-#make exception / try loop to test camera
+#make exception / try loop to test camera 
+
+#loop body
+
+cap.release()
+cv2.destroyAllWindows()
 
 #end of v1 initialization -vince
