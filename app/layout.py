@@ -13,3 +13,6 @@ class NovaGazeOverlay(QMainWindow):
         )
         
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        # Make the window cover the entire screen
+        screen_geo = QApplication.primaryScreen().geometry()
+        self.setGeometry(screen_geo)
