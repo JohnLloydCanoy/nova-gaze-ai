@@ -94,6 +94,8 @@ Create and switch to the new branch by running this command:
 git checkout -b feature-name
 ```
 
+**2. Edit the branch**
+
 <div align="center">
 
 # Nova Gaze AI: Restoring digital independence, one glance at a time.
