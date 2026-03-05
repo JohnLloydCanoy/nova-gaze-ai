@@ -95,6 +95,9 @@ git checkout -b feature-name
 ```
 
 **2. Edit the branch**
+```bash
+
+```
 
 <div align="center">
 
