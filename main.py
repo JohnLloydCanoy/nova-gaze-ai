@@ -13,6 +13,9 @@ def load_stylesheet(app):
 
 def main():
     app = QApplication(sys.argv)
+    
+    load_stylesheet(app)
+    
     window = NovaGazeOverlay()
     window.show()
     sys.exit(app.exec())
