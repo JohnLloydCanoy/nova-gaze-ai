@@ -11,3 +11,5 @@ class NovaGazeOverlay(QMainWindow):
             Qt.WindowType.WindowStaysOnTopHint | 
             Qt.WindowType.Tool
         )
+        
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
