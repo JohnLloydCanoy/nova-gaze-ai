@@ -88,6 +88,9 @@ git pull origin main
 
 **1. Create a branch for a specific feature**
 create a isolated branch for the a specific feature to be added 
+Create and switch to the new branch by running this command:
+
+
 
 <div align="center">
 
