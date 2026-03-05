@@ -106,6 +106,8 @@ git commit -m "Add transparent gesture HUD overlay"
 git push origin feature-name
 ```
 
+---
+
 <div align="center">
 
 # Nova Gaze AI: Restoring digital independence, one glance at a time.
