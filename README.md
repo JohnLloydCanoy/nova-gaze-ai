@@ -100,9 +100,11 @@ git checkout -b feature-name
 ```
 
 **3. Push the branch**
+```bash
 git add .
 git commit -m "Add transparent gesture HUD overlay"
 git push origin feature-name
+```
 
 <div align="center">
 
