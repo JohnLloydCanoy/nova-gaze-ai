@@ -16,3 +16,12 @@ def test_api():
     print("🚀 Sending image to Amazon Nova API... (Waiting for response)")
     
     result = nova_client.analyze_gaze_target(image_bytes)
+    
+    if result:
+        print("\n✅ SUCCESS! Connection to Amazon is working.")
+        print(f"🧠 AI identified the UI element as: '{result}'")
+    else:
+        print("\n❌ FAILED: Did not receive a valid response. Check your API key or network.")
+
+if __name__ == "__main__":
+    test_api()
