@@ -37,6 +37,7 @@ class NovaAIClient:
                         ]
                     }
                 ],
+                # Setting max_tokens to a low value to ensure we get a concise response
                 max_tokens=10 
             )
             
