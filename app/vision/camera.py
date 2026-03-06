@@ -17,3 +17,7 @@ class CameraThread(QThread):
                 h, w, ch = rgb_image.shape
                 bytes_per_line = ch * w
                 qt_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+                # Scale the image to fit the label while maintaining aspect ratio
+                scaled_qt_image = qt_image.scaled(320, 240, Qt.AspectRatioMode.KeepAspectRatio)
+                self.change_pixmap_signal.emit(scaled_qt_image)
+        cap.release()
