@@ -140,7 +140,7 @@ else:
 
 ---
 
-## 5. Gesture-to-Action Mapping
+## 5. Gesture-to-Action Mapping (mostly na ambag)
 
 This is what our module outputs to the rest of the system:
 
@@ -173,28 +173,36 @@ Natural blinks are ~100–150ms. We use:
 
 ```
 app/
+  vision/
+    __init__.py
+    camera.py            ← ✅ DONE — Camera thread + feed widget (from merged branch)
+  setting/
+    __init__.py
+    config.py            ← ✅ DONE — Env config for Nova API keys (from merged branch)
   logic/
     __init__.py
-    tracker.py          ← Camera loop + MediaPipe processing (exists, needs expansion)
-    blink_detector.py   ← EAR-based blink/wink state machine
-    gaze_estimator.py   ← Iris → screen coordinate mapping
-    dwell_detector.py   ← Fixation / dwell detection
-    gesture_engine.py   ← Combines all signals → outputs action events
-    calibration.py      ← 9-point calibration routine
-  vision/
-    __init__.py          ← (empty — reserved for screenshot/vision AI features by other team)
+    tracker.py           ← Needs rewrite: hook MediaPipe into existing CameraThread
+    blink_detector.py    ← EAR-based blink/wink state machine
+    gaze_estimator.py    ← Iris → screen coordinate mapping
+    dwell_detector.py    ← Fixation / dwell detection
+    gesture_engine.py    ← Combines all signals → outputs action events
+    calibration.py       ← 9-point calibration routine
 ```
+
+> **Note:** `camera.py` already handles the webcam in a QThread. Our gaze logic
+> must process frames FROM that thread — do NOT open a second `cv2.VideoCapture`.
 
 ### 6.2 Component Descriptions
 
-| Component            | Input                        | Output                          | Priority |
-|----------------------|------------------------------|---------------------------------|----------|
-| `tracker.py`         | Webcam frames                | Raw landmarks (478 points)      | P0       |
-| `blink_detector.py`  | Eye landmarks (12 points)    | Blink events (single/double/long/wink) | P0 |
-| `gaze_estimator.py`  | Iris + eye corner landmarks  | Screen coordinates (x, y)       | P0       |
-| `dwell_detector.py`  | Screen coordinates stream    | Dwell events (position + duration) | P1    |
-| `gesture_engine.py`  | All detector outputs         | Final action events             | P1       |
-| `calibration.py`     | User looking at dots         | Calibration mapping data        | P2       |
+| Component            | Input                        | Output                          | Priority | Status   |
+|----------------------|------------------------------|---------------------------------|----------|----------|
+| `camera.py`          | Webcam (cv2)                 | Raw frames via Qt signal        | P0       | ✅ Done  |
+| `tracker.py`         | Frames from CameraThread     | Raw landmarks (478 points)      | P0       | Needs rewrite |
+| `blink_detector.py`  | Eye landmarks (12 points)    | Blink events (single/double/long/wink) | P0 | Not started |
+| `gaze_estimator.py`  | Iris + eye corner landmarks  | Screen coordinates (x, y)       | P0       | Not started |
+| `dwell_detector.py`  | Screen coordinates stream    | Dwell events (position + duration) | P1    | Not started |
+| `gesture_engine.py`  | All detector outputs         | Final action events             | P1       | Not started |
+| `calibration.py`     | User looking at dots         | Calibration mapping data        | P2       | Not started |
 
 **Priority Key:** P0 = must have for basic demo, P1 = must have for full demo, P2 = nice to have
 
@@ -217,42 +225,48 @@ class GazeEvent:
 ## 7. Implementation Order
 
 ```
-Step 1:  tracker.py — Get camera loop running, extract landmarks in a thread
+Step 1:  ✅ camera.py — Camera thread is running (done by teammate)
             ↓
-Step 2:  blink_detector.py — Detect blinks using EAR (build on Vince's work)
+Step 2:  tracker.py — Add MediaPipe processing INTO existing CameraThread
             ↓
-Step 3:  gaze_estimator.py — Get iris ratios, basic center/left/right detection
+Step 3:  blink_detector.py — Detect blinks using EAR (build on Vince gwapo's work)
             ↓
-Step 4:  Wire into UI — Show a gaze dot on the overlay, react to blinks
+Step 4:  gaze_estimator.py — Get iris ratios, basic center/left/right detection
             ↓
-Step 5:  dwell_detector.py — Add fixation detection
+Step 5:  Wire into UI — Show a gaze dot on the overlay, react to blinks
             ↓
-Step 6:  gesture_engine.py — Combine everything into action events
+Step 6:  dwell_detector.py — Add fixation detection
             ↓
-Step 7:  calibration.py — 9-point calibration for accurate screen mapping
+Step 7:  gesture_engine.py — Combine everything into action events
             ↓
-Step 8:  Hand off GazeEvent stream to Reasoning Layer team
+Step 8:  calibration.py — 9-point calibration for accurate screen mapping
+            ↓
+Step 9:  Hand off GazeEvent stream to Reasoning Layer team
 ```
 
 ---
 
 ## 8. Integration with PySide6 UI
 
-The tracker must run in a **separate thread** (not block the UI).
+The camera already runs in a **separate QThread** (`CameraThread` in `camera.py`).
+We add our gaze processing into that same thread — no need to create a new one.
 
 ```
 Main Thread (PySide6 event loop)
     │
     ├── Overlay Window (transparent, always-on-top)
-    │     └── Gaze cursor dot (updated via signal)
+    │     ├── CameraFeedWidget (top-left, 40% opacity) ← ✅ Already working
+    │     └── Gaze cursor dot (updated via signal)     ← To build
     │
-    └── Tracker Thread (QThread)
-          ├── Camera capture loop (30 fps)
-          ├── MediaPipe processing
-          ├── Blink / Gaze / Dwell detection
+    └── CameraThread (QThread) — already in camera.py
+          ├── Camera capture loop (30 fps)             ← ✅ Already working
+          ├── MediaPipe landmark extraction             ← To add
+          ├── Blink / Gaze / Dwell detection            ← To add
           └── Emits Qt Signals → Main Thread
-               • gaze_moved(x, y)
-               • action_triggered(GazeEvent)
+               • change_pixmap_signal(QImage)           ← ✅ Already working
+               • landmarks_signal(landmarks)            ← To add
+               • gaze_moved(x, y)                       ← To add
+               • action_triggered(GazeEvent)            ← To add
 ```
 
 ---
