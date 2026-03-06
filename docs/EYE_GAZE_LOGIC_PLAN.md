@@ -165,6 +165,78 @@ Natural blinks are ~100–150ms. We use:
 - **Dwell + Blink combo** as the primary interaction — a blink only counts as a "click" if the user was already dwelling on something
 - **Cooldown timers** to prevent rapid-fire accidental triggers
 
+### 5.2 Predictive Action Menu (Quick Actions Popup)
+
+A floating menu that appears to help users when the system needs clarification or when manually triggered.
+
+#### When It Appears
+
+| Trigger                          | Description                                              |
+|----------------------------------|----------------------------------------------------------|
+| **Uncertainty**                  | System detects dwell but isn't sure what user wants (e.g., gaze between two buttons) |
+| **Look at corner** (manual)      | User looks at a designated screen corner for 0.5s to summon it |
+| **Ambiguous context**            | Multiple clickable elements near gaze position           |
+
+#### Menu Options (Basic Navigation)
+
+The menu shows 3-5 action buttons, each with the gesture instruction:
+
+```
+┌─────────────────────────────────────────────────────┐
+│              What would you like to do?             │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│   [ 👆 Click here ]         ← Blink to select       │
+│                                                     │
+│   [ ⬆️ Scroll Up ]          ← Look up to select     │
+│                                                     │
+│   [ ⬇️ Scroll Down ]        ← Look down to select   │
+│                                                     │
+│   [ ⬅️ Go Back ]            ← Look left to select   │
+│                                                     │
+│   [ ❌ Cancel ]              ← Long blink to close   │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+#### Selection Methods (depends on choice)
+
+| Menu Option       | How to Select                     | Why this gesture              |
+|-------------------|-----------------------------------|-------------------------------|
+| Click here        | Dwell on option + Blink           | Confirms intentional click    |
+| Scroll Up         | Look up (sustained 0.5s)          | Intuitive — look in direction |
+| Scroll Down       | Look down (sustained 0.5s)        | Intuitive — look in direction |
+| Go Back           | Look left (sustained 0.5s)        | Intuitive — "back" is left    |
+| Cancel/Dismiss    | Long blink (0.5s)                 | Universal "nevermind" gesture |
+
+#### Smart Suggestions (Future: learns from patterns)
+
+The system remembers what user did before in similar situations:
+
+| Context                              | Suggested First Option                  |
+|--------------------------------------|-----------------------------------------|
+| On a form, looking near "Submit"     | "Click Submit button"                   |
+| At bottom of page                    | "Scroll Down" (or "Go to next page")    |
+| Popup appeared                       | "Close popup" / "Click X"               |
+| Previously clicked same button       | Show that button first next time        |
+
+#### Menu Parameters
+
+| Parameter               | Default Value | Purpose                                     |
+|-------------------------|---------------|---------------------------------------------|
+| `MENU_TRIGGER_CORNER`   | Top-right     | Which corner summons the menu               |
+| `MENU_CORNER_DWELL_MS`  | 500 ms        | How long to look at corner to trigger       |
+| `MENU_TIMEOUT_MS`       | 5000 ms       | Auto-dismiss if no selection made           |
+| `MENU_OPTION_DWELL_MS`  | 600 ms        | Dwell time on an option before highlight    |
+
+#### UI Component: `ActionMenuWidget`
+
+- Semi-transparent popup (similar style to the top control tab)
+- Appears near gaze position but not blocking it
+- Each option shows: icon + label + gesture hint
+- Highlighted option has visual feedback (glow/border)
+- Dismisses after selection or timeout
+
 ---
 
 ## 6. Components to Build
@@ -179,6 +251,11 @@ app/
   setting/
     __init__.py
     config.py            ← ✅ DONE — Env config for Nova API keys (from merged branch)
+  components/
+    __init__.py
+    tab.py               ← ✅ DONE — Top control tab widget
+    button.py            ← (empty for now)
+    action_menu.py       ← NEW: Predictive Action Menu popup widget
   logic/
     __init__.py
     tracker.py           ← Needs rewrite: hook MediaPipe into existing CameraThread
@@ -187,6 +264,7 @@ app/
     dwell_detector.py    ← Fixation / dwell detection
     gesture_engine.py    ← Combines all signals → outputs action events
     calibration.py       ← 9-point calibration routine
+    action_predictor.py  ← NEW: Logic for when to show menu + smart suggestions
 ```
 
 > **Note:** `camera.py` already handles the webcam in a QThread. Our gaze logic
@@ -202,6 +280,8 @@ app/
 | `gaze_estimator.py`  | Iris + eye corner landmarks  | Screen coordinates (x, y)       | P0       | Not started |
 | `dwell_detector.py`  | Screen coordinates stream    | Dwell events (position + duration) | P1    | Not started |
 | `gesture_engine.py`  | All detector outputs         | Final action events             | P1       | Not started |
+| `action_menu.py`     | Show/hide signal + options   | User's selected action          | P1       | Not started |
+| `action_predictor.py`| Gaze context + history       | When to show menu + suggestions | P2       | Not started |
 | `calibration.py`     | User looking at dots         | Calibration mapping data        | P2       | Not started |
 
 **Priority Key:** P0 = must have for basic demo, P1 = must have for full demo, P2 = nice to have
