@@ -14,3 +14,5 @@ def test_api():
     with open(test_image_path, "rb") as image_file:
         image_bytes = image_file.read()
     print("🚀 Sending image to Amazon Nova API... (Waiting for response)")
+    
+    result = nova_client.analyze_gaze_target(image_bytes)
