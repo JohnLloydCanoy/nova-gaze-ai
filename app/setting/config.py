@@ -3,5 +3,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-class NovaAIClient:
+class Config:
+    """Centralized configuration for Nova Gaze AI."""
     
