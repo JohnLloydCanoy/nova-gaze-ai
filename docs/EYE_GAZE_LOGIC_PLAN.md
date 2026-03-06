@@ -319,9 +319,13 @@ Step 6:  dwell_detector.py — Add fixation detection
             ↓
 Step 7:  gesture_engine.py — Combine everything into action events
             ↓
-Step 8:  calibration.py — 9-point calibration for accurate screen mapping
+Step 8:  action_menu.py — Build the Predictive Action Menu UI component
             ↓
-Step 9:  Hand off GazeEvent stream to Reasoning Layer team
+Step 9:  action_predictor.py — Logic for when to show menu + remember patterns
+            ↓
+Step 10: calibration.py — 9-point calibration for accurate screen mapping
+            ↓
+Step 11: Hand off GazeEvent stream to Reasoning Layer team
 ```
 
 ---
@@ -336,7 +340,8 @@ Main Thread (PySide6 event loop)
     │
     ├── Overlay Window (transparent, always-on-top)
     │     ├── CameraFeedWidget (top-left, 40% opacity) ← ✅ Already working
-    │     └── Gaze cursor dot (updated via signal)     ← To build
+    │     ├── Gaze cursor dot (updated via signal)     ← To build
+    │     └── ActionMenuWidget (popup near gaze)       ← To build (Section 5.2)
     │
     └── CameraThread (QThread) — already in camera.py
           ├── Camera capture loop (30 fps)             ← ✅ Already working
@@ -347,6 +352,8 @@ Main Thread (PySide6 event loop)
                • landmarks_signal(landmarks)            ← To add
                • gaze_moved(x, y)                       ← To add
                • action_triggered(GazeEvent)            ← To add
+               • show_action_menu(options, position)    ← To add (for Predictive Menu)
+               • menu_option_selected(action)           ← To add (user picked an option)
 ```
 
 ---
@@ -361,6 +368,9 @@ Main Thread (PySide6 event loop)
 | Calibration drifts over time       | Allow quick re-calibration (look at center point)        |
 | Low-spec webcam = low FPS          | Target 15fps minimum; reduce MediaPipe complexity if needed |
 | User fatigue from sustained gaze   | Add rest mode (e.g., close eyes 2s = pause tracking)    |
+| Action menu appears too often      | Only show on uncertainty or manual trigger (corner look) |
+| Menu blocks what user wants to see | Position menu offset from gaze, make it semi-transparent |
+| Wrong suggestion shown first       | Learn from history; most-used action bubbles to top      |
 
 ---
 
@@ -374,6 +384,10 @@ Main Thread (PySide6 event loop)
 | Dwell fires reliably          | Stare at a point, confirm event fires at ~800ms    |
 | No false triggers             | Use normally for 60s, count unintended events      |
 | Thread doesn't block UI       | Resize/drag overlay while tracker runs             |
+| Action menu appears on corner | Look at top-right corner for 0.5s → menu shows    |
+| Menu option selection works   | Look at "Scroll Up" + hold → action triggers       |
+| Menu dismisses on long blink  | Open menu, long blink → menu closes                |
+| Menu timeout works            | Open menu, do nothing for 5s → auto-dismiss        |
 
 ---
 
