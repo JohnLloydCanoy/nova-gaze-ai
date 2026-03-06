@@ -11,7 +11,7 @@ def load_stylesheet(app):
             app.setStyleSheet(f.read())
     else:
         print(f"Warning: Stylesheet not found at {path}")
-
+        
 def main():
     app = QApplication(sys.argv)
     
