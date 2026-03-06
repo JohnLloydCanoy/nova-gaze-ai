@@ -5,7 +5,7 @@ from app.layout import NovaGazeOverlay
 
 def load_stylesheet(app):
     # Load the stylesheet if it exists
-    path = os.path.join("app", "assests", "styles.qss")
+    path = os.path.join("app", "assets", "styles.qss")  # FIXED typo
     if os.path.exists(path):
         with open(path, "r") as f:
             app.setStyleSheet(f.read())
