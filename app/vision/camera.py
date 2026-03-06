@@ -2,7 +2,7 @@ import sys
 import cv2
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QGraphicsOpacityEffect, QApplication
 from PySide6.QtCore import Qt, QThread, Signal, Slot, QPoint
-from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtGui import QImage, QPixmap, QPainter, QPainterPath
 
 class CameraThread(QThread):
     change_pixmap_signal = Signal(QImage)
@@ -30,6 +30,29 @@ class CameraThread(QThread):
         self._run_flag = False
         self.wait()
 
+# --- NEW: Custom Label to handle the rounded image drawing ---
+class RoundedCameraLabel(QLabel):
+    def __init__(self, parent=None, radius=20):
+        super().__init__(parent)
+        self.radius = radius
+
+    def paintEvent(self, event):
+        """Overrides the default paint event to clip the image to a rounded rectangle"""
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing) # Makes the edges smooth
+        
+        # Create a rounded rectangle path
+        path = QPainterPath()
+        path.addRoundedRect(self.rect(), self.radius, self.radius)
+        
+        # Clip the drawing area so the video frame doesn't spill over the corners
+        painter.setClipPath(path)
+        
+        # Draw the current camera frame
+        if self.pixmap():
+            painter.drawPixmap(self.rect(), self.pixmap())
+# -------------------------------------------------------------
+
 class CameraFeedWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -40,11 +63,15 @@ class CameraFeedWidget(QWidget):
             Qt.WindowType.FramelessWindowHint | 
             Qt.WindowType.WindowStaysOnTopHint
         )
+        
+        # --- NEW: Make the background transparent so the rounded corners show the desktop ---
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         
-        self.image_label = QLabel(self)
+        # --- UPDATED: Use the custom RoundedCameraLabel instead of the standard QLabel ---
+        self.image_label = RoundedCameraLabel(self, radius=20) 
         self.layout.addWidget(self.image_label)
 
         # Apply 40% Opacity to the entire widget
@@ -60,26 +87,20 @@ class CameraFeedWidget(QWidget):
         self.thread.change_pixmap_signal.connect(self.update_image)
         self.thread.start()
 
-    # --- 2. Mouse Events to enable dragging ---
+    # --- Mouse Events to enable dragging ---
     def mousePressEvent(self, event):
-        """Triggered when the user clicks the widget."""
         if event.button() == Qt.MouseButton.LeftButton:
-            # Calculate the distance between the mouse click and the top-left corner of the window
             self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             event.accept()
 
     def mouseMoveEvent(self, event):
-        """Triggered when the user drags the mouse."""
         if event.buttons() == Qt.MouseButton.LeftButton and self._drag_pos is not None:
-            # Move the window to the new mouse position, minus the initial offset
             self.move(event.globalPosition().toPoint() - self._drag_pos)
             event.accept()
 
     def mouseReleaseEvent(self, event):
-        """Triggered when the user releases the mouse button."""
         self._drag_pos = None
         event.accept()
-    # ------------------------------------------
 
     @Slot(QImage)
     def update_image(self, qt_image):
