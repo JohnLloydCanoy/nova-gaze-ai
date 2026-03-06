@@ -25,3 +25,33 @@ class CameraThread(QThread):
         """Sets run flag to False and waits for thread to finish"""
         self._run_flag = False
         self.wait()
+
+class CameraFeedWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(320, 240)
+
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.image_label = QLabel(self)
+        self.layout.addWidget(self.image_label)
+
+        # Apply 50% Opacity to the entire widget
+        self.opacity_effect = QGraphicsOpacityEffect()
+        self.opacity_effect.setOpacity(0.5)
+        self.setGraphicsEffect(self.opacity_effect)
+
+        # Start the video thread
+        self.thread = VideoThread()
+        self.thread.change_pixmap_signal.connect(self.update_image)
+        self.thread.start()
+
+    @Slot(QImage)
+    def update_image(self, qt_image):
+        """Updates the label with the newest camera frame"""
+        self.image_label.setPixmap(QPixmap.fromImage(qt_image))
+
+    def shutdown(self):
+        """Safely turns off the camera light when the app closes"""
+        self.thread.stop()
