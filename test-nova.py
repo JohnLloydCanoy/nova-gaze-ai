@@ -10,4 +10,6 @@ def test_api():
         print(f"❌ Error: Could not find '{test_image_path}'. Please add a test screenshot to your folder.")
         return
     
-    
+    print(f"📸 Reading {test_image_path}...")
+    with open(test_image_path, "rb") as image_file:
+        image_bytes = image_file.read()
