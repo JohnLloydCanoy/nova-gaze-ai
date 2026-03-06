@@ -2,7 +2,7 @@ import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCore import Qt
 from app.components.tab import TopControlTab
-from app.vision.camera import CameraThread
+from app.vision.camera import CameraFeedWidget
 
 
 class NovaGazeOverlay(QMainWindow):
@@ -23,9 +23,14 @@ class NovaGazeOverlay(QMainWindow):
         
     def setup_components(self, screen_geo):
         """Initializes and positions all child UI components."""
+        # Camera Feed Widget
+        self.camera_widget = CameraFeedWidget(self)
+        self.camera_widget.move(20, 20)
+        
         self.top_tab = TopControlTab(self)
         self.top_tab.close_requested.connect(sys.exit)
         center_x = (screen_geo.width() // 2) - (self.top_tab.width() // 2)
         top_margin = 20
         
         self.top_tab.move(center_x, top_margin)
+        

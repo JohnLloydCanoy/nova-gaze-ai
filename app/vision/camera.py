@@ -37,13 +37,13 @@ class CameraFeedWidget(QWidget):
         self.image_label = QLabel(self)
         self.layout.addWidget(self.image_label)
 
-        # Apply 50% Opacity to the entire widget
+        # Apply 40% Opacity to the entire widget
         self.opacity_effect = QGraphicsOpacityEffect()
-        self.opacity_effect.setOpacity(0.5)
+        self.opacity_effect.setOpacity(0.4)
         self.setGraphicsEffect(self.opacity_effect)
 
         # Start the video thread
-        self.thread = VideoThread()
+        self.thread = CameraThread()
         self.thread.change_pixmap_signal.connect(self.update_image)
         self.thread.start()
 
