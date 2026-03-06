@@ -13,3 +13,4 @@ def test_api():
     print(f"📸 Reading {test_image_path}...")
     with open(test_image_path, "rb") as image_file:
         image_bytes = image_file.read()
+    print("🚀 Sending image to Amazon Nova API... (Waiting for response)")
