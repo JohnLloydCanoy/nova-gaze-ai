@@ -5,3 +5,6 @@ from PySide6.QtGui import QImage, QPixmap
 
 class CameraThread(QThread):
     change_pixmap_signal = Signal(QImage)
+    def __init__(self):
+        super().__init__()
+        self._run_flag = True
