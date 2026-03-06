@@ -21,3 +21,7 @@ class CameraThread(QThread):
                 scaled_qt_image = qt_image.scaled(320, 240, Qt.AspectRatioMode.KeepAspectRatio)
                 self.change_pixmap_signal.emit(scaled_qt_image)
         cap.release()
+    def stop(self):
+        """Sets run flag to False and waits for thread to finish"""
+        self._run_flag = False
+        self.wait()
