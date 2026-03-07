@@ -1,11 +1,12 @@
 """
-Phase 3: Blink Detection State Machine
-Goal: Count actual blinks (not just "eyes closed" frames).
+Phase 4: Gaze Direction + Blink Detection
+Goal: Track WHERE you're looking (left/right/up/down/center) + blinks.
 
-A blink = eyes close for 2+ frames, then reopen.
-This prevents false positives from noise or single-frame glitches.
+Gaze direction is calculated by comparing iris center position
+to the eye corner positions. This gives us a normalized ratio
+that tells us which direction the user is looking.
 
-Run this with: .\venv\Scripts\python.exe test_mediapipe.py
+Run this with: .\\venv\\Scripts\\python.exe test_mediapipe.py
 Press 'q' to quit.
 """
 
@@ -46,10 +47,30 @@ LEFT_EYE = [362, 380, 374, 263, 386, 385]
 RIGHT_IRIS = [468, 469, 470, 471, 472]
 LEFT_IRIS = [473, 474, 475, 476, 477]
 
+# Head pose landmarks for vertical gaze (more reliable than iris alone)
+NOSE_TIP = 1
+FOREHEAD = 10
+CHIN = 152
+LEFT_EYE_OUTER = 33
+RIGHT_EYE_OUTER = 263
+
 # ===== BLINK DETECTION CONFIG =====
 EAR_THRESHOLD = 0.20          # Below this = eyes closed
 BLINK_CONSEC_FRAMES = 2       # Must be closed for 2+ frames to count
 LONG_BLINK_FRAMES = 15        # 15+ frames = intentional long blink (like a "hold click")
+
+# ===== GAZE DIRECTION CONFIG =====
+# These thresholds define the "dead zone" in the center
+# Values outside this range = looking in that direction
+GAZE_HORIZONTAL_THRESH = 0.35  # Ratio threshold for left/right (0.5 = center)
+GAZE_VERTICAL_THRESH = 0.40    # Ratio threshold for up/down
+
+# ===== CALIBRATION STATE =====
+# Auto-calibrates the neutral iris position during the first few seconds
+calibration_samples = []
+calibration_complete = False
+CALIBRATION_FRAMES = 60  # ~2 seconds at 30fps
+baseline_iris_y_ratio = 0.5  # Will be set during calibration
 
 # ===== BLINK STATE TRACKING =====
 blink_counter = 0             # Total blinks detected
@@ -106,14 +127,109 @@ def get_eye_landmarks(face_landmarks, eye_indices, frame_width, frame_height):
     return points
 
 
+def calculate_gaze_ratio(eye_landmarks, iris_center):
+    """
+    Calculate HORIZONTAL gaze direction as a ratio.
+    
+    Returns horizontal_ratio where:
+    - 0.0 = looking far left, 0.5 = center, 1.0 = looking far right
+    
+    eye_landmarks: [outer_corner, upper_outer, upper_inner, inner_corner, lower_inner, lower_outer]
+    iris_center: (x, y) of iris center
+    """
+    outer_corner = eye_landmarks[0]  # Left edge of eye (from user's perspective)
+    inner_corner = eye_landmarks[3]  # Right edge of eye
+    
+    # ----- HORIZONTAL GAZE -----
+    # Where is iris between left and right corners?
+    eye_width = inner_corner[0] - outer_corner[0]
+    if abs(eye_width) < 1:
+        h_ratio = 0.5
+    else:
+        h_ratio = (iris_center[0] - outer_corner[0]) / eye_width
+    
+    # Clamp to 0-1 range
+    h_ratio = max(0.0, min(1.0, h_ratio))
+    
+    return h_ratio
+
+
+def calculate_vertical_iris_ratio(eye_landmarks, iris_center):
+    """
+    Calculate vertical iris position using ONLY eye corners as reference.
+    
+    Eye corners (outer and inner) are stable landmarks that don't move
+    when blinking. We use their Y-midpoint as the neutral reference.
+    
+    Returns: raw ratio of where iris is vertically within the eye
+    - Lower values = looking UP (iris near top of eye)
+    - Higher values = looking DOWN (iris near bottom)
+    """
+    outer_corner = eye_landmarks[0]
+    inner_corner = eye_landmarks[3]
+    upper_lid = eye_landmarks[1]
+    lower_lid = eye_landmarks[5]
+    
+    # Use eye corners' Y average as stable reference (doesn't move with blinks)
+    corner_y_midpoint = (outer_corner[1] + inner_corner[1]) / 2.0
+    
+    # Calculate eye height for normalization
+    eye_height = lower_lid[1] - upper_lid[1]
+    if eye_height < 3:  # Eye probably closed
+        return 0.5
+    
+    # How far is iris center from the corner midpoint?
+    # Negative = iris is above midpoint = looking up
+    # Positive = iris is below midpoint = looking down
+    iris_offset = iris_center[1] - corner_y_midpoint
+    
+    # Normalize by eye height and convert to ratio
+    # This gives us a value around 0 for center, negative for up, positive for down
+    normalized = iris_offset / eye_height
+    
+    return normalized
+
+
+def get_gaze_direction(h_ratio, v_ratio):
+    """
+    Convert gaze ratios to a human-readable direction.
+    """
+    horizontal = "CENTER"
+    vertical = "CENTER"
+    
+    if h_ratio < GAZE_HORIZONTAL_THRESH:
+        horizontal = "LEFT"
+    elif h_ratio > (1.0 - GAZE_HORIZONTAL_THRESH):
+        horizontal = "RIGHT"
+    
+    if v_ratio < GAZE_VERTICAL_THRESH:
+        vertical = "UP"
+    elif v_ratio > (1.0 - GAZE_VERTICAL_THRESH):
+        vertical = "DOWN"
+    
+    # Combine into single direction string
+    if vertical == "CENTER" and horizontal == "CENTER":
+        return "CENTER"
+    elif vertical == "CENTER":
+        return horizontal
+    elif horizontal == "CENTER":
+        return vertical
+    else:
+        return f"{vertical}-{horizontal}"
+
+
 def draw_landmarks_on_image(frame, detection_result):
-    """Draw face landmarks on the image and calculate EAR"""
+    """Draw face landmarks on the image, calculate EAR and gaze direction"""
+    global calibration_samples, calibration_complete, baseline_iris_y_ratio
+    
     if not detection_result.face_landmarks:
-        return frame, None, None
+        return frame, None, None, None, None
     
     h, w, _ = frame.shape
     left_ear = None
     right_ear = None
+    gaze_h = 0.5
+    gaze_v = 0.5
     
     for face_landmarks in detection_result.face_landmarks:
         # Get eye landmarks for EAR calculation
@@ -123,6 +239,41 @@ def draw_landmarks_on_image(frame, detection_result):
         # Calculate EAR for each eye
         right_ear = calculate_ear(right_eye_points)
         left_ear = calculate_ear(left_eye_points)
+        
+        # Get iris centers
+        right_iris_center = (face_landmarks[RIGHT_IRIS[0]].x * w, face_landmarks[RIGHT_IRIS[0]].y * h)
+        left_iris_center = (face_landmarks[LEFT_IRIS[0]].x * w, face_landmarks[LEFT_IRIS[0]].y * h)
+        
+        # Calculate HORIZONTAL gaze from iris position
+        right_h = calculate_gaze_ratio(right_eye_points, right_iris_center)
+        left_h = calculate_gaze_ratio(left_eye_points, left_iris_center)
+        gaze_h = (right_h + left_h) / 2.0
+        
+        # Calculate VERTICAL gaze from iris position (EYES ONLY - no head movement needed!)
+        right_v_raw = calculate_vertical_iris_ratio(right_eye_points, right_iris_center)
+        left_v_raw = calculate_vertical_iris_ratio(left_eye_points, left_iris_center)
+        avg_v_raw = (right_v_raw + left_v_raw) / 2.0
+        
+        # Auto-calibration: collect samples during first 2 seconds
+        if not calibration_complete:
+            calibration_samples.append(avg_v_raw)
+            if len(calibration_samples) >= CALIBRATION_FRAMES:
+                # Set baseline as the average of samples (user's neutral position)
+                baseline_iris_y_ratio = sum(calibration_samples) / len(calibration_samples)
+                calibration_complete = True
+                print(f">>> CALIBRATION COMPLETE! Baseline set to: {baseline_iris_y_ratio:.4f}")
+                print("    Now try looking up and down!")
+        
+        # Apply calibration: deviation from baseline, amplified
+        deviation = avg_v_raw - baseline_iris_y_ratio
+        
+        # Amplify the small iris movements (eyes move subtly)
+        # Positive deviation = looking down, negative = looking up
+        amplified = deviation * 8.0  # High amplification for subtle iris movements
+        
+        # Convert to 0-1 range (0.5 = center)
+        gaze_v = 0.5 + amplified
+        gaze_v = max(0.0, min(1.0, gaze_v))
         
         # Draw all landmarks as small dots
         for idx, landmark in enumerate(face_landmarks):
@@ -161,7 +312,7 @@ def draw_landmarks_on_image(frame, detection_result):
             cv2.circle(frame, (cx, cy), radius, (255, 0, 255), 1)
             cv2.circle(frame, (cx, cy), 2, (0, 0, 255), -1)
     
-    return frame, left_ear, right_ear
+    return frame, left_ear, right_ear, gaze_h, gaze_v
 
 
 # Open the webcam
@@ -172,16 +323,16 @@ if not cap.isOpened():
     exit()
 
 print("=" * 50)
-print("Phase 3: Blink Detection State Machine")
+print("Phase 4: EYES-ONLY Gaze Detection")
+print("(Designed for users who can only move their eyes)")
 print("=" * 50)
-print("This detects ACTUAL blinks, not just closed eyes!")
 print("")
-print("Gesture types:")
-print("  - Single Blink: quick close-open (like a click)")
-print("  - Double Blink: two blinks within 0.4s (like double-click)")
-print("  - Long Blink:   hold eyes closed 0.5s+ (like a drag/hold)")
+print("IMPORTANT: Look straight ahead for 2 seconds")
+print("           to calibrate your neutral eye position!")
 print("")
-print("TRY IT: Blink naturally and watch the counters!")
+print("After calibration, try looking up/down/left/right")
+print("using ONLY your eyes (no head movement needed).")
+print("")
 print("Press 'q' to quit.")
 print("=" * 50)
 
@@ -199,10 +350,25 @@ while True:
     detection_result = detector.detect(mp_image)
     
     if detection_result.face_landmarks:
-        frame, left_ear, right_ear = draw_landmarks_on_image(frame, detection_result)
+        frame, left_ear, right_ear, gaze_h, gaze_v = draw_landmarks_on_image(frame, detection_result)
+        
+        # Show calibration status
+        if not calibration_complete:
+            progress = len(calibration_samples) / CALIBRATION_FRAMES * 100
+            cv2.putText(frame, "CALIBRATING...", (frame.shape[1]//2 - 100, 50), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2)
+            cv2.putText(frame, "Look straight ahead", (frame.shape[1]//2 - 120, 80), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            # Progress bar
+            bar_x = frame.shape[1]//2 - 100
+            cv2.rectangle(frame, (bar_x, 100), (bar_x + 200, 120), (100, 100, 100), 2)
+            cv2.rectangle(frame, (bar_x, 100), (bar_x + int(progress * 2), 120), (0, 255, 255), -1)
         
         # Calculate average EAR
         avg_ear = (left_ear + right_ear) / 2.0
+        
+        # Get gaze direction
+        gaze_direction = get_gaze_direction(gaze_h, gaze_v)
         
         # ===== BLINK STATE MACHINE =====
         if avg_ear < EAR_THRESHOLD:
@@ -273,11 +439,41 @@ while True:
         cv2.rectangle(frame, (10, 240), (10 + bar_width, 260), bar_color, -1)
         cv2.rectangle(frame, (10, 240), (10 + int(EAR_THRESHOLD * 400), 260), (100, 100, 100), 2)
         
+        # ===== GAZE DIRECTION DISPLAY =====
+        # Show gaze direction text (right side of screen)
+        h, w = frame.shape[:2]
+        gaze_color = (0, 255, 255)  # Cyan
+        cv2.putText(frame, f"GAZE: {gaze_direction}", (w - 250, 30), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.9, gaze_color, 2)
+        cv2.putText(frame, f"H: {gaze_h:.2f}  V: {gaze_v:.2f}", (w - 200, 60), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
+        
+        # Draw a visual gaze indicator box (mini crosshair)
+        box_x, box_y = w - 120, 100
+        box_size = 80
+        
+        # Draw the box outline
+        cv2.rectangle(frame, (box_x, box_y), (box_x + box_size, box_y + box_size), (100, 100, 100), 2)
+        
+        # Draw center crosshairs (dead zone)
+        dead_zone = int(box_size * GAZE_HORIZONTAL_THRESH)
+        center = box_size // 2
+        cv2.rectangle(frame, 
+                     (box_x + center - dead_zone//2, box_y + center - dead_zone//2),
+                     (box_x + center + dead_zone//2, box_y + center + dead_zone//2),
+                     (50, 50, 50), 1)
+        
+        # Draw the gaze dot
+        dot_x = int(box_x + gaze_h * box_size)
+        dot_y = int(box_y + gaze_v * box_size)
+        cv2.circle(frame, (dot_x, dot_y), 8, gaze_color, -1)
+        cv2.circle(frame, (dot_x, dot_y), 8, (255, 255, 255), 2)
+        
     else:
         cv2.putText(frame, "No face detected", (10, 30), 
                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     
-    cv2.imshow('Blink Detection - Phase 3', frame)
+    cv2.imshow('Phase 4 - Gaze Direction + Blink Detection', frame)
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
