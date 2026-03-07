@@ -28,8 +28,6 @@ class NovaAIClient:
         print(f"  [✔] Model Linked: {self.model}")
         print(f"  [✔] Chat Session Initialized.\n")
 
-   
-
     def chat_with_vision(self, user_text, image_bytes=None):
         """
         Standard chatbot function that can optionally 'see' an image.

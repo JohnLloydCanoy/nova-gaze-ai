@@ -16,6 +16,7 @@ class CameraThread(QThread):
         while self._run_flag:
             ret, cv_img = cap.read()
             if ret:
+                cv_img = cv2.flip(cv_img, 1) # Flip the image horizontally for a mirror effect
                 rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgb_image.shape
                 bytes_per_line = ch * w
