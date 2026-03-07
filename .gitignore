@@ -1,13 +1,51 @@
-# Created by venv; see https://docs.python.org/3/library/venv.html
-
-venv/*
-venv
-
-.env
-.env.*
-# Python cache files
+# ==========================================
+# Python Cache & Bytecode
+# ==========================================
 __pycache__/
-__pycache__/*
+*.py[cod]
+*$py.class
 *.pyc
 *.pyo
 *.pyd
+
+# ==========================================
+# Virtual Environments
+# ==========================================
+venv/
+.venv/
+env/
+ENV/
+
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
+.env
+.env.*
+*.secret
+
+# ==========================================
+# IDEs & Code Editors
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================================
+# OS Generated Files (Windows & Mac)
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+ehthumbs_vista.db
+[Tt]humbs.db
+[Dd]esktop.ini
+
+# ==========================================
+# Logs & Databases
+# ==========================================
+*.log
+*.sqlite3
