@@ -26,7 +26,7 @@ class TopControlTab(QWidget):
             pixmap = QPixmap(logo_path).scaled(28, 28, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.logo_label.setPixmap(pixmap)
         
-        self.title_label = QLabel("Nova Gaze AI")
+        self.title_label = QLabel(" Gaze AI")
         self.title_label.setStyleSheet("""
             font-weight: bold; 
             color: #BF00FF; 
