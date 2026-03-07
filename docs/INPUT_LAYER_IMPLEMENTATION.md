@@ -356,12 +356,12 @@ Overlay appears with camera feed (40% opacity) and gaze dot.
 
 ---
 
-## For Next Team Member
+## For Next Team Member(KAMO NA BAHALA)
 
 1. **Read this doc first** — gives you the full picture
 2. **Run `test_mediapipe.py`** — see the raw tracking data
 3. **Next priority:** Implement dwell detection (P0)
 4. **Key insight:** Vertical tracking uses iris-only with calibration — don't try to use head pose!
-5. **Ask Zach** if you need context on why something was done a certain way
+5. **Ask me** if you need context on why something was done a certain way
 
-Good luck! 🚀
+Good luck! 
