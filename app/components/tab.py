@@ -110,13 +110,37 @@ class TopControlTab(QWidget):
         bubble = f'<div style="margin-bottom: 5px;"><b style="color: #a0a0a0;">Nova:</b> <span style="color: #e0e0e0;">{text}</span></div>'
         self.chat_display.append(bubble)
         self.add_divider()
-
+    def on_suggestion_clicked(self, suggestion_text):
+        self.add_user_message(f"Selected: {suggestion_text}")
+        # Logic to execute the action goes here
     def add_divider(self):
         """Adds a subtle horizontal line divider."""
         divider = '<hr style="border: 0; height: 1px; background: #333; margin: 5px 0;">'
         self.chat_display.append(divider)
         self.chat_display.ensureCursorVisible()
+    def add_suggestion_buttons(self, suggestions):
+        """Adds interactive buttons for AI suggestions."""
+        container = QFrame()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(5, 5, 5, 5)
+        layout.setSpacing(4)
 
+        for text in suggestions:
+            btn = QPushButton(f"💡 {text}")
+            btn.setStyleSheet("""
+                QPushButton {
+                    background: #2a2a2a; color: #00d4ff; text-align: left;
+                    padding: 8px; border: 1px solid #333; border-radius: 4px;
+                }
+                QPushButton:hover { background: #333; border-color: #00d4ff; }
+            """)
+            # Connect button to an action (e.g., repeating it to the AI)
+            btn.clicked.connect(lambda checked, t=text: self.on_suggestion_clicked(t))
+            layout.addWidget(btn)
+
+        # Append the entire button group to the chat display
+        self.main_layout.insertWidget(self.main_layout.count() - 1, container)
+        self.add_divider()
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
