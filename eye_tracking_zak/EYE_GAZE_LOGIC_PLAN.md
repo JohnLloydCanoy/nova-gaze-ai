@@ -1,7 +1,29 @@
 # Nova-Gaze: Eye Gaze Logic — Design Document
 
-> Planning Phase  
+> **Status:** Phases 1-6 complete — see `docs/INPUT_LAYER_IMPLEMENTATION.md` for details
 
+---
+
+## ⚠️ IMPORTANT: MediaPipe API Change
+
+**MediaPipe 0.10.x has breaking changes!** The old `mp.solutions.face_mesh` API no longer exists.
+
+Use the new Tasks API:
+```python
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
+
+# Load model (auto-downloads on first run)
+base_options = python.BaseOptions(model_asset_path="face_landmarker.task")
+options = vision.FaceLandmarkerOptions(base_options=base_options, num_faces=1)
+detector = vision.FaceLandmarker.create_from_options(options)
+
+# Process frame
+mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
+result = detector.detect(mp_image)
+```
+
+This is already implemented in `app/logic/eye_tracker.py`.
 
 ---
 
@@ -247,7 +269,7 @@ The system remembers what user did before in similar situations:
 app/
   vision/
     __init__.py
-    camera.py            ← ✅ DONE — Camera thread + feed widget (from merged branch)
+    camera.py            ← ✅ DONE — Camera thread + eye tracking signals
   setting/
     __init__.py
     config.py            ← ✅ DONE — Env config for Nova API keys (from merged branch)
@@ -255,15 +277,15 @@ app/
     __init__.py
     tab.py               ← ✅ DONE — Top control tab widget
     button.py            ← (empty for now)
+    gaze_dot.py          ← ✅ DONE — GazeDot + CalibrationOverlay widgets
     action_menu.py       ← NEW: Predictive Action Menu popup widget
   logic/
     __init__.py
-    tracker.py           ← Needs rewrite: hook MediaPipe into existing CameraThread
-    blink_detector.py    ← EAR-based blink/wink state machine
-    gaze_estimator.py    ← Iris → screen coordinate mapping
+    eye_tracker.py       ← ✅ DONE — Central tracking (gaze, blinks, calibration)
+    tracker.py           ← (unused — replaced by eye_tracker.py)
     dwell_detector.py    ← Fixation / dwell detection
     gesture_engine.py    ← Combines all signals → outputs action events
-    calibration.py       ← 9-point calibration routine
+    calibration.py       ← 9-point calibration for precise screen mapping
     action_predictor.py  ← NEW: Logic for when to show menu + smart suggestions
 ```
 
@@ -274,15 +296,18 @@ app/
 
 | Component            | Input                        | Output                          | Priority | Status   |
 |----------------------|------------------------------|---------------------------------|----------|----------|
-| `camera.py`          | Webcam (cv2)                 | Raw frames via Qt signal        | P0       | ✅ Done  |
-| `tracker.py`         | Frames from CameraThread     | Raw landmarks (478 points)      | P0       | Needs rewrite |
-| `blink_detector.py`  | Eye landmarks (12 points)    | Blink events (single/double/long/wink) | P0 | Not started |
-| `gaze_estimator.py`  | Iris + eye corner landmarks  | Screen coordinates (x, y)       | P0       | Not started |
+| `camera.py`          | Webcam (cv2)                 | Raw frames + tracking signals   | P0       | ✅ Done  |
+| `eye_tracker.py`     | RGB frames                   | Gaze, blinks, EAR, calibration  | P0       | ✅ Done  |
+| `gaze_dot.py`        | Gaze signals                 | Visual cursor overlay           | P0       | ✅ Done  |
 | `dwell_detector.py`  | Screen coordinates stream    | Dwell events (position + duration) | P1    | Not started |
 | `gesture_engine.py`  | All detector outputs         | Final action events             | P1       | Not started |
 | `action_menu.py`     | Show/hide signal + options   | User's selected action          | P1       | Not started |
 | `action_predictor.py`| Gaze context + history       | When to show menu + suggestions | P2       | Not started |
-| `calibration.py`     | User looking at dots         | Calibration mapping data        | P2       | Not started |
+| `calibration.py`     | User looking at 9 dots       | Accurate screen mapping         | P2       | Not started |
+
+> **Note:** `eye_tracker.py` combines the functionality of the originally planned
+> `tracker.py`, `blink_detector.py`, and `gaze_estimator.py` into a single class
+> with auto-calibration. See `docs/INPUT_LAYER_IMPLEMENTATION.md` for details.
 
 **Priority Key:** P0 = must have for basic demo, P1 = must have for full demo, P2 = nice to have
 
@@ -305,28 +330,31 @@ class GazeEvent:
 ## 7. Implementation Order
 
 ```
-Step 1:  ✅ camera.py — Camera thread is running (done by teammate)
+Step 1:  ✅ DONE — camera.py — Camera thread + eye tracking integration
             ↓
-Step 2:  tracker.py — Add MediaPipe processing INTO existing CameraThread
+Step 2:  ✅ DONE — eye_tracker.py — MediaPipe + gaze + blinks + auto-calibration
             ↓
-Step 3:  blink_detector.py — Detect blinks using EAR (build on Vince gwapo's work)
+Step 3:  ✅ DONE — gaze_dot.py — Visual gaze cursor overlay
             ↓
-Step 4:  gaze_estimator.py — Get iris ratios, basic center/left/right detection
+Step 4:  ✅ DONE — Wire into UI — Signals connected, dot follows gaze, pulses on blink
             ↓
-Step 5:  Wire into UI — Show a gaze dot on the overlay, react to blinks
+Step 5:  🔜 NEXT — dwell_detector.py — Add fixation detection
             ↓
-Step 6:  dwell_detector.py — Add fixation detection
+Step 6:  gesture_engine.py — Combine everything into action events
             ↓
-Step 7:  gesture_engine.py — Combine everything into action events
+Step 7:  action_menu.py — Build the Predictive Action Menu UI component
             ↓
-Step 8:  action_menu.py — Build the Predictive Action Menu UI component
+Step 8:  action_predictor.py — Logic for when to show menu + remember patterns
             ↓
-Step 9:  action_predictor.py — Logic for when to show menu + remember patterns
+Step 9:  calibration.py — 9-point calibration for accurate screen mapping
             ↓
-Step 10: calibration.py — 9-point calibration for accurate screen mapping
-            ↓
-Step 11: Hand off GazeEvent stream to Reasoning Layer team
+Step 10: Hand off GazeEvent stream to Reasoning Layer team
 ```
+
+> **Implementation Notes:**
+> - `eye_tracker.py` consolidated `tracker.py`, `blink_detector.py`, and `gaze_estimator.py` into one class
+> - Auto-calibration implemented (60 frames baseline) — no separate calibration step needed for basic use
+> - See `docs/INPUT_LAYER_IMPLEMENTATION.md` for full details and code samples
 
 ---
 
