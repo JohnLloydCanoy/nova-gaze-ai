@@ -5,6 +5,8 @@ from app.layout import NovaGazeOverlay
 from app.aws_nova.client import NovaAIClient 
 
 def load_stylesheet(app):
+    # Load the stylesheet if it exists
+    path = os.path.join("app", "assets", "styles.qss")  # FIXED typo
     # Changed 'assests' to 'assets'
     path = os.path.join("app", "assets", "styles.qss")
     if os.path.exists(path):
