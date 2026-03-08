@@ -1,31 +1,30 @@
 import os
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit, QLineEdit, QPushButton, QFrame)
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton)
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QPainter, QColor, QPixmap, QFont
+from PySide6.QtGui import QPainter, QColor, QPixmap
 
 class TopControlTab(QWidget):
     close_requested = Signal()
-    send_message_requested = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(500, 250) # Slightly increased height for better spacing
+        self.setFixedSize(500, 50) # Reduced height since chat/input are removed
         
         self.main_layout = QVBoxLayout(self)
-        self.main_layout.setContentsMargins(15, 12, 15, 12)
-        self.main_layout.setSpacing(8)
-
-        # --- Refined Header ---
+        self.main_layout.setContentsMargins(15, 10, 15, 10)
+        
+        # --- Header ---
         self.header_layout = QHBoxLayout()
         self.header_layout.setSpacing(10)
         
-        # Logo on the left side of the title
+        # Logo
         self.logo_label = QLabel()
         logo_path = os.path.join("app", "assests", "colored-logo-only.png")
         if os.path.exists(logo_path):
             pixmap = QPixmap(logo_path).scaled(28, 28, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.logo_label.setPixmap(pixmap)
         
+        # Title
         self.title_label = QLabel(" Gaze AI")
         self.title_label.setStyleSheet("""
             font-weight: bold; 
@@ -34,6 +33,7 @@ class TopControlTab(QWidget):
             letter-spacing: 0.5px;
         """)
         
+        # Close Button
         self.close_btn = QPushButton("✕")
         self.close_btn.setFixedSize(28, 28)
         self.close_btn.setStyleSheet("""
@@ -54,6 +54,7 @@ class TopControlTab(QWidget):
         self.header_layout.addWidget(self.title_label)
         self.header_layout.addStretch()
         self.header_layout.addWidget(self.close_btn)
+        
         self.main_layout.addLayout(self.header_layout)
 
         # --- Chat Display with HTML Support ---
@@ -142,8 +143,9 @@ class TopControlTab(QWidget):
         self.main_layout.insertWidget(self.main_layout.count() - 1, container)
         self.add_divider()
     def paintEvent(self, event):
+        """Draws the rounded rectangular background."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setBrush(QColor(15, 15, 15, 230)) # Slightly darker for premium feel
+        painter.setBrush(QColor(15, 15, 15, 230)) # Premium feel dark background
         painter.setPen(Qt.PenStyle.NoPen) 
         painter.drawRoundedRect(self.rect(), 18, 18)

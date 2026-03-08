@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from scipy.spatial import distance as dist
 from app.logic.blink_detector import BlinkDetector
+from app.logic.dwell_logic import DwellManager
 
 # Support for MediaPipe
 try:
@@ -15,6 +16,11 @@ except ImportError:
 class GazeTracker:
     def __init__(self):
         self.blink_engine = BlinkDetector()
+        
+        # Thresholds required by camera.py
+        self.SELECT_BLINK_THRESHOLD = 90   # ~3 seconds at 30fps
+        self.CLOSE_BLINK_THRESHOLD = 180   # ~6 seconds at 30fps
+        
         self.face_mesh = FaceMesh(
             max_num_faces=1,
             refine_landmarks=True,
@@ -80,4 +86,3 @@ class GazeTracker:
         elif v_ratio > 0.65: direction = "down"
 
         return event, avg_ear < self.EAR_THRESHOLD, direction, h_ratio
-    
