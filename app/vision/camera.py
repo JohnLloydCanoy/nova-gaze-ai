@@ -77,7 +77,7 @@ class CameraFeedWidget(QWidget):
 
         # Apply 40% Opacity to the entire widget
         self.opacity_effect = QGraphicsOpacityEffect()
-        self.opacity_effect.setOpacity(0.4)
+        self.opacity_effect.setOpacity(1)
         self.setGraphicsEffect(self.opacity_effect)
 
         # Track the mouse position for dragging
