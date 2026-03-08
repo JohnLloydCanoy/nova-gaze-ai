@@ -28,7 +28,7 @@ class CameraThread(QThread):
                     # 2. Emit tracking data
                     self.gaze_signal.emit(
                         tracking['gaze_h'], 
-                        tracking['gaze_v'], 
+                        tracking['gaze_'], 
                         tracking['gaze_direction']
                     )
                         
