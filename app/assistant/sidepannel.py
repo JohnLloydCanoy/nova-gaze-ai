@@ -19,9 +19,11 @@ class ChatSidePanel(QWidget):
         self.container = QWidget(self)
         self.container.setStyleSheet("""
             QWidget {
-                background-color: #121212;
+                /* #121212 converted to rgba with 40% opacity */
+                background-color: rgba(18, 18, 18, 0.4); 
                 border-radius: 15px;
-                border: 1px solid #2A2A2A;
+                /* Softened the border slightly to match the glass effect */
+                border: 1px solid rgba(42, 42, 42, 0.6); 
             }
         """)
         self.container_layout = QVBoxLayout(self.container)
@@ -31,7 +33,8 @@ class ChatSidePanel(QWidget):
         self.header_layout = QHBoxLayout()
         
         self.title_label = QLabel("NOVA Gaze AI")
-        self.title_label.setStyleSheet("color: #BB86FC; font-weight: bold; font-size: 16px; border: none;")
+        # Added background: transparent so it doesn't inherit the container's background stack
+        self.title_label.setStyleSheet("color: #BB86FC; font-weight: bold; font-size: 16px; border: none; background: transparent;")
         
         self.header_layout.addWidget(self.title_label)
         self.header_layout.addStretch() 
@@ -42,7 +45,8 @@ class ChatSidePanel(QWidget):
         self.chat_display.setReadOnly(True)
         self.chat_display.setStyleSheet("""
             QTextEdit {
-                background-color: #1E1E1E;
+                /* #1E1E1E converted to rgba with 40% opacity */
+                background-color: rgba(30, 30, 30, 0.4);
                 color: #E0E0E0;
                 border-radius: 8px;
                 padding: 10px;
@@ -57,15 +61,17 @@ class ChatSidePanel(QWidget):
         self.chat_input.setPlaceholderText("Ask Nova...")
         self.chat_input.setStyleSheet("""
             QLineEdit {
-                background-color: #1E1E1E;
+                /* #1E1E1E converted to rgba with 40% opacity */
+                background-color: rgba(30, 30, 30, 0.4);
                 color: white;
                 border-radius: 8px;
                 padding: 12px;
-                border: 1px solid #00E5FF; /* The cyan border from your screenshot */
+                border: 1px solid rgba(0, 229, 255, 0.5); /* Semi-transparent cyan border */
                 font-size: 14px;
             }
             QLineEdit:focus {
                 border: 2px solid #00E5FF;
+                background-color: rgba(30, 30, 30, 0.6); /* Slightly darker when typing */
             }
         """)
         self.container_layout.addWidget(self.chat_input)
@@ -81,6 +87,7 @@ class ChatSidePanel(QWidget):
             self.chat_display.append(f'<span style="color: #00E5FF;"><b>You:</b></span> {user_text}')
             # Clear the input box
             self.chat_input.clear()
+            self.send_message_requested.emit(user_text)
 
 if __name__ == "__main__":
     import sys
