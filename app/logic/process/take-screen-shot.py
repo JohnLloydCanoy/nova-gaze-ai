@@ -34,4 +34,5 @@ def process_chat_with_screenshot(
     
     try:
         main_window.hide()
+        QApplication.processEvents()
         
