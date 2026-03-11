@@ -31,3 +31,7 @@ def process_chat_with_screenshot(
     Returns:
         The response from the Nova AI client, or None if it fails.
     """
+    
+    try:
+        main_window.hide()
+        
