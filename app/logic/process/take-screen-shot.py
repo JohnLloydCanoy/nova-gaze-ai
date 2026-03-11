@@ -8,3 +8,26 @@ import pyautogui
 from app.aws_nova.client import NovaAIClient
 
 
+logger = logging.getLogger(__name__)
+
+def process_chat_with_screenshot(
+    main_window, 
+    nova_client: NovaAIClient, 
+    chat_message: str, 
+    file_path: str = "temp_screenshot.png",
+    cleanup_after: bool = True
+    ) -> dict | None:
+    """
+    Hides the main app window, captures the desktop, saves it to a file, 
+    and submits it to Nova AI along with the user's message.
+    
+    Args:
+        main_window: The PyQt6 main window instance to hide/show.
+        nova_client: An initialized instance of NovaAIClient.
+        chat_message: The context-aware chat message from the user.
+        file_path: The destination path for the screenshot.
+        cleanup_after: If True, deletes the screenshot after submission for security.
+        
+    Returns:
+        The response from the Nova AI client, or None if it fails.
+    """
