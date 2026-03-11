@@ -2,8 +2,6 @@ import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCore import Qt, QBuffer, QIODevice, QTimer
 from app.vision.camera import CameraFeedWidget
-from app.components.selection_panel import SelectionPanel
-from app.components.status_panel import StatusPanel
 
 class NovaGazeOverlay(QMainWindow):
     def __init__(self, ai_client):
