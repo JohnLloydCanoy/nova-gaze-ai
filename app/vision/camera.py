@@ -33,3 +33,6 @@ class CameraThread(QThread):
                 bytes_per_line = ch * w
                 qt_image = QImage(processed_img.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
                 scaled_qt_image = qt_image.scaled(320, 240, Qt.AspectRatioMode.KeepAspectRatio)
+                
+                # Emit the image and the UI data
+                self.change_pixmap_signal.emit(scaled_qt_image, status_text, progress)
