@@ -25,6 +25,7 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
         "Each object must have the following keys:"
         "'element_name' (e.g., 'Submit Button', 'Search Bar'),"
         "'action' (e.g., 'Click', 'Type'), and"
+        "'description' (e.g., 'Submits the login form')."
     )
     
     logger.info(f"Requesting UI interaction analysis for {image_path}")
