@@ -37,3 +37,12 @@ class TestVisionAnalyzer(unittest.TestCase):
 
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["element_name"], "Search")
+        
+    def test_bad_json_handling(self):
+        """Tests that the function fails safely and consistently if the AI returns garbage."""
+        
+        self.mock_client.analyze_vision.return_value = "Sorry, I cannot analyze this image."
+        
+        result = get_possible_ui_interactions(self.mock_client, self.test_image)
+        
+        self.assertEqual(result, [])
