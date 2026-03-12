@@ -23,7 +23,7 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
         "Return the result STRICTLY as a JSON array of objects. Do not include any markdown formatting,"
         "code blocks, or conversational text."
         "Each object must have the following keys:"
-        ""
+        "'element_name' (e.g., 'Submit Button', 'Search Bar'),"
         ""
     )
     
