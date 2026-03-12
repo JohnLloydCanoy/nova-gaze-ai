@@ -97,3 +97,8 @@ class CameraFeedWidget(QWidget):
         self.gaze_label = QLabel("GAZE: INIT")
         self.gaze_label.setStyleSheet("color: #03DAC6; font-weight: bold; font-size: 14px; background: transparent;")
         self.overlay_layout.addWidget(self.gaze_label)
+        
+        # Progress bar background
+        self.progress_bg = QWidget()
+        self.progress_bg.setFixedSize(100, 8)
+        self.progress_bg.setStyleSheet("background-color: #333333; border-radius: 4px;")
