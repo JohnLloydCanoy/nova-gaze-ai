@@ -41,3 +41,6 @@ class GazeAnalyzer:
         new_state = "CENTER"
         event_to_emit = None
         progress = 0.0
+        
+        if results.multi_face_landmarks:
+            landmarks = results.multi_face_landmarks[0].landmark
