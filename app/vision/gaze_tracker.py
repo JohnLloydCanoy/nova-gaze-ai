@@ -18,3 +18,9 @@ class GazeAnalyzer:
         self.state_start_time = time.time()
         
         self.gaze_threshold = 0.12
+        
+        # Normalized gaze thresholds (percentage of eye height/width)
+        self.UP_THRESHOLD = -0.15
+        self.DOWN_THRESHOLD = 0.18
+        self.RIGHT_THRESHOLD = 0.15
+        
