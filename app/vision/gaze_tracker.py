@@ -61,4 +61,8 @@ class GazeAnalyzer:
                 
             ear = eye_height / eye_width
             
+            eye_center_y = (eye_top.y + eye_bottom.y) / 2
+            eye_center_x = (eye_inner.x + eye_outer.x) / 2
             
+            vertical_ratio = (iris.y - eye_center_y) / eye_height
+            horizontal_ratio = (iris.x - eye_center_x) / eye_width
