@@ -57,3 +57,14 @@ class RoundedCameraLabel(QLabel):
         
         if self.pixmap():
             painter.drawPixmap(self.rect(), self.pixmap())
+            
+class CameraFeedWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(320, 240)
+
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint | 
+            Qt.WindowType.WindowStaysOnTopHint
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
