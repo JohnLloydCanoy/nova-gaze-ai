@@ -36,3 +36,5 @@ class CameraThread(QThread):
                 
                 # Emit the image and the UI data
                 self.change_pixmap_signal.emit(scaled_qt_image, status_text, progress)
+                
+        cap.release()
