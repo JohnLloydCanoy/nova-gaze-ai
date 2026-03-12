@@ -41,3 +41,6 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
     except json.JSONDecodeError as json_err:
         logger.error(f"Failed to parse Nova AI response as JSON: {json_err}. Raw response: {response_text}")
         return []
+    except Exception as e:
+        logger.error(f"An error occurred during interaction analysis: {e}")
+        return []
