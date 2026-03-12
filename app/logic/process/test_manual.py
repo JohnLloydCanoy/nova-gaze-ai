@@ -7,3 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 def run_manual_test():
     test_image_path = "sample_screen.png" ## Replace with your actual test image path
+    
+    if not os.path.exists(test_image_path):
+        with open(test_image_path, "wb") as f:
+            f.write(b"dummy image data")  # Create an empty file for testing purposes
