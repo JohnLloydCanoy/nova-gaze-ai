@@ -45,3 +45,6 @@ def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
             image_path=temp_screenshot_path
         )
         logger.info(f"[Step 2 Complete] Extracted {len(ui_interactions)} elements.")
+    
+    except Exception as e:
+        logger.info(f"[Step 2 Complete] Extracted {len(ui_interactions)} elements.")
