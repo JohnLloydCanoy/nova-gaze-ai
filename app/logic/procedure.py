@@ -24,3 +24,5 @@ def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
     
     temp_screenshot_path = "secure_temp_capture.png"
     ui_interactions = []
+    
+    logger.info("=== Starting Screen Analysis Procedure ===")
