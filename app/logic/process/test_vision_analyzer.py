@@ -1,3 +1,4 @@
 import unittest
 from unittest.mock import MagicMock
-from vision_analyzer import VisionAnalyzer
+from analysis import get_possible_ui_interactions
+
