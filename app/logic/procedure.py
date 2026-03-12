@@ -9,3 +9,4 @@ from app.logic.process.vision_analyzer import get_possible_ui_interactions
 
 logger = logging.getLogger(__name__)
 
+def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
