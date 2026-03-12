@@ -35,3 +35,6 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
             
         # Parse the cleaned response as JSON
         interactions = json.loads(clean_text.strip())
+        
+        logger.info(f"Successfully identified {len(interactions)} possible interactions.")
+        return interactions
