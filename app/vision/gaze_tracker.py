@@ -56,4 +56,5 @@ class GazeAnalyzer:
             eye_height = self._calculate_distance(eye_top, eye_bottom)
             eye_width = self._calculate_distance(eye_inner, eye_outer)
             
-            
+            if eye_width == 0:
+                eye_width = 0.0001
