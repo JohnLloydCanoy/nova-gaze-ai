@@ -1,116 +1,142 @@
-import sys
-from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtCore import Qt, QBuffer, QIODevice
-from PySide6.QtGui import QScreen, QPixmap
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+    QTextEdit, QLineEdit, QPushButton, QScrollArea
+)
+from PySide6.QtCore import Qt, Signal
 
-from app.components.tab import TopControlTab
-from app.vision.camera import CameraFeedWidget
-from app.assistant.sidepannel import ChatSidePanel
-from app.logic.process.procedure import execute_screen_analysis_procedure  # NEW: Import the orchestrator
-
-class NovaGazeOverlay(QMainWindow):
-    def __init__(self, ai_client):
-        super().__init__()
-        self.nova = ai_client
+class ChatSidePanel(QWidget):
+    send_message_requested = Signal(str)
+    action_selected = Signal(dict)
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(380, 800) 
+    
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint | 
-            Qt.WindowType.WindowStaysOnTopHint | 
-            Qt.WindowType.Tool
+            Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        
-        screen_geo = QApplication.primaryScreen().geometry()
-        self.setGeometry(screen_geo)
-        self.setup_components(screen_geo)
-        
-    def setup_components(self, screen_geo):
-        self.camera_widget = CameraFeedWidget(self)
-        self.camera_widget.move(20, 20)
-        
-        self.top_tab = TopControlTab(self)
-        self.top_tab.close_requested.connect(QApplication.instance().quit)
-        
-        center_x = (screen_geo.width() // 2) - (self.top_tab.width() // 2)
-        self.top_tab.move(center_x, 20)
-        
-        self.side_panel = ChatSidePanel(self)
-        
-        # Calculate X to snap to the right edge with a 20px margin
-        panel_x = screen_geo.width() - self.side_panel.width() - 20
-        # Calculate Y to center it vertically on the screen
-        panel_y = (screen_geo.height() - self.side_panel.height()) // 2
-        self.side_panel.move(panel_x, panel_y)
-        
-        # --- THE WIRING ---
-        # 1. Wire the panel's chat input to the AI handler
-        self.side_panel.send_message_requested.connect(self.handle_ai_chat)
-        # 2. Wire the dynamic button clicks to the action handler
-        self.side_panel.action_selected.connect(self.handle_button_click)
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(10, 10, 10, 10)
 
-    def handle_ai_chat(self, text):
-        """Routes the user's input to either the UI scanner or the standard chatbot."""
-        text_lower = text.lower()
-        
-        # --- SCENARIO A: The user wants to scan the screen for buttons ---
-        if "scan" in text_lower or "look" in text_lower:
-            self.side_panel.chat_display.append('<span style="color: #BB86FC;"><b>Nova:</b> Scanning your screen, please wait...</span>')
-            
-            # Briefly hide the overlay to get a clean desktop screenshot
-            self.hide()
-            QApplication.processEvents()
-            
-            try:
-                # Trigger the procedure we built earlier
-                real_ai_data = execute_screen_analysis_procedure(self.nova)
-            finally:
-                # Always restore the UI
-                self.show()
-                QApplication.processEvents()
-                
-            # Populate the dynamic buttons
-            if real_ai_data:
-                self.side_panel.chat_display.append(f'<span style="color: #03DAC6;"><b>Nova:</b> Found {len(real_ai_data)} actions. What should we do?</span>')
-                self.side_panel.generate_action_buttons(real_ai_data)
-            else:
-                self.side_panel.chat_display.append('<span style="color: #FF5252;"><b>Nova:</b> I could not identify any clear interactions on the screen.</span>')
+        self.container = QWidget(self)
+        self.container.setStyleSheet("""
+            QWidget {
+                background-color: rgba(18, 18, 18, 0.4); 
+                border-radius: 15px;
+                border: 1px solid rgba(42, 42, 42, 0.6); 
+            }
+        """)
+        self.container_layout = QVBoxLayout(self.container)
+        self.container_layout.setContentsMargins(15, 15, 15, 15)
+        self.container_layout.setSpacing(15)
 
-        # --- SCENARIO B: Standard chat conversation ---
-        else:
-            self.hide()
-            QApplication.processEvents()
-            
-            image_bytes = self.capture_screen()
-            
-            self.show()
-            QApplication.processEvents()
-            
-            # Send to Nova client
-            reply = self.nova.chat_with_vision(text, image_bytes)
-            
-            # Print the AI's reply into the side panel
-            formatted_reply = f'<br><span style="color: #BB86FC;"><b>Nova:</b></span> {reply}<br>'
-            self.side_panel.chat_display.append(formatted_reply)
-            
-            # Keep top tab updated as well (from your original code)
-            if hasattr(self.top_tab, 'add_assistant_message'):
-                self.top_tab.add_assistant_message(reply)
+        # Header
+        self.header_layout = QHBoxLayout()
+        self.title_label = QLabel("NOVA Gaze AI")
+        self.title_label.setStyleSheet("color: #BB86FC; font-weight: bold; font-size: 16px; border: none; background: transparent;")
+        self.header_layout.addWidget(self.title_label)
+        self.header_layout.addStretch() 
+        self.container_layout.addLayout(self.header_layout)
 
-    def handle_button_click(self, action_data: dict):
-        """Catches the emitted data when a user clicks a dynamically generated button."""
-        action = action_data.get('action', 'Unknown Action')
-        element = action_data.get('element_name', 'Unknown Element')
+        # Chat Display
+        self.chat_display = QTextEdit()
+        self.chat_display.setReadOnly(True)
+        self.chat_display.setStyleSheet("""
+            QTextEdit {
+                background-color: rgba(30, 30, 30, 0.4);
+                color: #E0E0E0;
+                border-radius: 8px;
+                padding: 10px;
+                border: none;
+                font-size: 14px;
+            }
+        """)
+        self.chat_display.append("Nova: System ready. I can see your screen. How can I assist your navigation today?")
+        self.container_layout.addWidget(self.chat_display, stretch=2)
+
+        # Dynamic Action Buttons Area
+        self.buttons_scroll = QScrollArea()
+        self.buttons_scroll.setWidgetResizable(True)
+        self.buttons_scroll.setStyleSheet("""
+            QScrollArea { border: none; background: transparent; }
+            QScrollBar:vertical { width: 10px; }
+        """)
         
-        # Acknowledge the click in the UI
-        self.side_panel.chat_display.append(f'<span style="color: #03DAC6;"><b>System:</b> Preparing to execute {action} on {element}.</span>')
+        self.buttons_widget = QWidget()
+        self.buttons_widget.setStyleSheet("background: transparent; border: none;")
+        self.buttons_layout = QVBoxLayout(self.buttons_widget)
+        self.buttons_layout.setSpacing(10)
+        self.buttons_layout.setContentsMargins(0, 0, 0, 0)
+        self.buttons_scroll.setWidget(self.buttons_widget)
         
-        # Next step: Move the mouse here!
-        # self.move_mouse_to_element(element)
-    def capture_screen(self):
-        """Captures the current screen to show Nova (in-memory buffer for standard chat)."""
-        screen = QApplication.primaryScreen()
-        screenshot = screen.grabWindow(0)
-        
-        buffer = QBuffer()
-        buffer.open(QIODevice.OpenModeFlag.WriteOnly)
-        screenshot.save(buffer, "PNG")
-        return buffer.data().data()
+        self.container_layout.addWidget(self.buttons_scroll, stretch=1)
+
+        # Chat Input
+        self.chat_input = QLineEdit()
+        self.chat_input.setPlaceholderText("Ask Nova...")
+        self.chat_input.setStyleSheet("""
+            QLineEdit {
+                background-color: rgba(30, 30, 30, 0.4);
+                color: white;
+                border-radius: 8px;
+                padding: 12px;
+                border: 1px solid rgba(0, 229, 255, 0.5);
+                font-size: 14px;
+            }
+            QLineEdit:focus {
+                border: 2px solid #00E5FF;
+                background-color: rgba(30, 30, 30, 0.6); 
+            }
+        """)
+        self.container_layout.addWidget(self.chat_input)
+
+        self.layout.addWidget(self.container)
+        self.chat_input.returnPressed.connect(self.handle_prompt)
+
+    def handle_prompt(self):
+        user_text = self.chat_input.text().strip()
+        if user_text:
+            self.chat_display.append(f'<span style="color: #00E5FF;"><b>You:</b></span> {user_text}')
+            self.chat_input.clear()
+            self.send_message_requested.emit(user_text)
+    
+    def clear_action_buttons(self):
+        while self.buttons_layout.count():
+            item = self.buttons_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+
+    def generate_action_buttons(self, interactions: list):
+        self.clear_action_buttons() 
+        for interaction in interactions:
+            element_name = interaction.get("element_name", "Unknown Element")
+            action_type = interaction.get("action", "Interact")
+            description = interaction.get("description", "")
+            
+            btn_text = f"[{action_type}] {element_name}\n({description})"
+            btn = QPushButton(btn_text)
+            btn.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(3, 218, 198, 0.2); 
+                    color: #03DAC6;
+                    border: 1px solid #03DAC6;
+                    border-radius: 8px;
+                    padding: 15px; 
+                    font-size: 13px;
+                    font-weight: bold;
+                    text-align: left;
+                }
+                QPushButton:hover {
+                    background-color: #03DAC6;
+                    color: #121212; 
+                }
+            """)
+            btn.clicked.connect(lambda checked=False, i=interaction: self._on_action_clicked(i))
+            self.buttons_layout.addWidget(btn)
+
+    def _on_action_clicked(self, interaction_data: dict):
+        self.chat_display.append(f'<span style="color: #03DAC6;"><b>System:</b> Executing {interaction_data.get("action")} on {interaction_data.get("element_name")}...</span>')
+        self.action_selected.emit(interaction_data)

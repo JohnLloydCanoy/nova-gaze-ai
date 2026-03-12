@@ -1,8 +1,8 @@
 import os
 import time
 import logging
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QBuffer, QIODevice 
+from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QBuffer, QIODevice
 import pyautogui
 
 from app.aws_nova.client import NovaAIClient
