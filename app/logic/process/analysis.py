@@ -34,4 +34,4 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
             clean_text = clean_text[:-3]
             
         # Parse the cleaned response as JSON
-        interactions = json.loads(clean_text)
+        interactions = json.loads(clean_text.strip())
