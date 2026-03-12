@@ -10,3 +10,14 @@ from app.logic.process.vision_analyzer import get_possible_ui_interactions
 logger = logging.getLogger(__name__)
 
 def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
+    """
+    Master procedure that securely orchestrates capturing the user's screen,
+    analyzing it for UI interactions, and cleaning up the sensitive image data.
+    
+    Args:
+        nova_client: An initialized NovaAIClient instance.
+        
+    Returns:
+        A list of dictionaries containing actionable UI elements, 
+        or an empty list if any step fails.
+    """
