@@ -81,3 +81,6 @@ class GazeAnalyzer:
             cv2.circle(frame, (cx, cy), 3, (0, 229, 255), -1)
             
             if new_state != self.current_state:
+                # If user looked somewhere else; reset the timer immediately
+                self.current_state = new_state
+                self.state_start_time = time.time()
