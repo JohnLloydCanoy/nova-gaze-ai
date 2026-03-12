@@ -92,3 +92,8 @@ class GazeAnalyzer:
                     if elapsed >= 5.0:
                         event_to_emit = "SCAN"
                         self.state_start_time = time.time() # Reset timer after emitting event
+                elif new_state == "UP":
+                    progress = min(elapsed / 3.0, 1.0) # 3 seconds to SELECT UP
+                    if elapsed >= 3.0:
+                        event_to_emit = "SELECT_UP"
+                        self.state_start_time = time.time()
