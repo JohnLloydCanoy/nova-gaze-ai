@@ -102,3 +102,9 @@ class GazeAnalyzer:
                     if elapsed >= 3.0:
                         event_to_emit = "SELECT_DOWN"
                         self.state_start_time = time.time()
+                        
+                elif new_state == "RIGHT":
+                    progress = min(elapsed / 2.0, 1.0) # 2 seconds to CLICK (Faster for UX)
+                    if elapsed >= 2.0:
+                        event_to_emit = "CLICK"
+                        self.state_start_time = time.time()
