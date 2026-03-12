@@ -38,3 +38,7 @@ class CameraThread(QThread):
                 self.change_pixmap_signal.emit(scaled_qt_image, status_text, progress)
                 
         cap.release()
+        
+    def stop(self):
+        self._run_flag = False
+        self.wait()
