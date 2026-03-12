@@ -14,3 +14,7 @@ def run_manual_test():
     nova_client = NovaAIClient()  
     print("Sending request to Nova AI...")
     results = get_possible_ui_interactions(client, test_image_path)
+    
+    print("\n--- AI Response ---")
+    import pprint
+    pprint.pprint(results)
