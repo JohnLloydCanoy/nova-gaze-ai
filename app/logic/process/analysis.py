@@ -18,3 +18,10 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
     system_prompt = ()
     
     logger.info(f"Requesting UI interaction analysis for {image_path}")
+    
+    try:
+        # Submit the image and our strict prompt to the Nova client
+        response_text = nova_client.analyze_vision(
+            image_path=image_path,
+            prompt=system_prompt
+        )
