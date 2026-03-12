@@ -18,7 +18,7 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
     """
     # Define a strict system prompt to guide Nova AI's analysis towards identifying actionable UI elements.
     system_prompt = (
-        ""
+        "You are an expert UI/UX automation assistant. Analyze the provided screenshot of a computer screen."
         ""
         ""
         ""
