@@ -48,3 +48,16 @@ def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
     
     except Exception as e:
         logger.info(f"[Step 2 Complete] Extracted {len(ui_interactions)} elements.")
+        
+    finally:
+        logger.info("[Step 3] Executing secure cleanup...")
+        if os.path.exists(temp_screenshot_path):
+            try:
+                os.remove(temp_screenshot_path)
+                logger.debug(f"Deleted temporary user data: {temp_screenshot_path}")
+            except OSError as cleanup_error:
+                logger.critical(f"Security Warning: Could not delete screenshot! {cleanup_error}")
+                
+        logger.info("=== Screen Analysis Procedure Finished ===")
+        
+    return ui_interactions
