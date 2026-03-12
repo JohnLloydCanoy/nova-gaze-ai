@@ -18,3 +18,7 @@ class TestVisionAnalyzer(unittest.TestCase):
         """
         self.mock_client.analyze_vision.return_value = fake_ai_response
         result = get_possible_ui_interactions(self.mock_client, self.test_image_path)
+        
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0]["element_name"], "Login Button")
+        self.assertEqual(result[1]["action"], "Type")
