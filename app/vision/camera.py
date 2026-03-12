@@ -10,3 +10,8 @@ class CameraThread(QThread):
     change_pixmap_signal = Signal(QImage, str, float)
     
     gaze_action_signal = Signal(str)
+    
+    def __init__(self):
+        super().__init__()
+        self._run_flag = True
+        self.gaze_analyzer = GazeAnalyzer()# Initialize the brain
