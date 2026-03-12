@@ -14,3 +14,5 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
     Returns:
         list[dict]: _description_
     """
+    
+    system_prompt = ()
