@@ -1,5 +1,6 @@
 import logging
 import os
+from app.aws_nova import client
 from app.aws_nova.client import NovaAIClient
 from vision_analyzer import get_possible_ui_interactions
 
@@ -13,7 +14,7 @@ def run_manual_test():
             f.write(b"dummy image data")  # Create an empty file for testing purposes
     nova_client = NovaAIClient()  
     print("Sending request to Nova AI...")
-    results = get_possible_ui_interactions(client, test_image_path)
+    results = get_possible_ui_interactions(nova_client, test_image_path)
     
     print("\n--- AI Response ---")
     import pprint
