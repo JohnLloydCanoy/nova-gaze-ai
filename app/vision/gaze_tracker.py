@@ -25,4 +25,12 @@ class GazeAnalyzer:
         self.RIGHT_THRESHOLD = 0.15
         
     def _calculate_distance(self, point1, point2):
-        return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
+        """"Helper function to calculate the 2D distance between two facial landmarks."""
+        return math.hypot(point1.x - point2.x, point1.y - point2.y)
+        
+    def process_frame(self, frame):
+        """_summary_
+
+        Args:
+            frame (_type_): _description_
+        """
