@@ -42,3 +42,18 @@ class CameraThread(QThread):
     def stop(self):
         self._run_flag = False
         self.wait()
+        
+class RoundedCameraLabel(QLabel):
+    def __init__(self, parent=None, radius=20):
+        super().__init__(parent)
+        self.radius = radius
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        path = QPainterPath()
+        path.addRoundedRect(self.rect(), self.radius, self.radius)
+        painter.setClipPath(path)
+        
+        if self.pixmap():
+            painter.drawPixmap(self.rect(), self.pixmap())
