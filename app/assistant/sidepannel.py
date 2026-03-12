@@ -13,10 +13,15 @@ class ChatSidePanel(QWidget):
     """
     
     send_message_requested = Signal(str)
+    action_selected = Signal(dict)
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedSize(380, 800) 
+        
+        # --- NEW: State Tracking for Gaze Navigation ---
+        self.action_buttons = [] # Stores a list of (button_widget, interaction_data)
+        self.current_selection_index = -1 # -1 means nothing is selected yet
     
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint | 
@@ -32,9 +37,9 @@ class ChatSidePanel(QWidget):
         self.container = QWidget(self)
         self.container.setStyleSheet("""
             QWidget {
-                background-color: #121212;
+                background-color: rgba(18, 18, 18, 0.4); 
                 border-radius: 15px;
-                border: 1px solid #2A2A2A;
+                border: 1px solid rgba(42, 42, 42, 0.6); 
             }
         """)
         self.container_layout = QVBoxLayout(self.container)
@@ -43,7 +48,6 @@ class ChatSidePanel(QWidget):
 
         # Header
         self.header_layout = QHBoxLayout()
-        
         self.title_label = QLabel("NOVA Gaze AI")
         self.title_label.setStyleSheet(
             "color: #BB86FC; font-weight: bold; font-size: 16px; border: none;"
@@ -51,7 +55,6 @@ class ChatSidePanel(QWidget):
         
         self.header_layout.addWidget(self.title_label)
         self.header_layout.addStretch() 
-        
         self.container_layout.addLayout(self.header_layout)
 
         # Chat display area
@@ -59,7 +62,7 @@ class ChatSidePanel(QWidget):
         self.chat_display.setReadOnly(True)
         self.chat_display.setStyleSheet("""
             QTextEdit {
-                background-color: #1E1E1E;
+                background-color: rgba(30, 30, 30, 0.4);
                 color: #E0E0E0;
                 border-radius: 8px;
                 padding: 10px;
@@ -83,7 +86,7 @@ class ChatSidePanel(QWidget):
         self.chat_input.setPlaceholderText("Ask Nova... (Press Enter to send)")
         self.chat_input.setStyleSheet("""
             QLineEdit {
-                background-color: #1E1E1E;
+                background-color: rgba(30, 30, 30, 0.4);
                 color: white;
                 border-radius: 8px;
                 padding: 12px;
@@ -92,6 +95,7 @@ class ChatSidePanel(QWidget):
             }
             QLineEdit:focus {
                 border: 2px solid #00E5FF;
+                background-color: rgba(30, 30, 30, 0.6); 
             }
         """)
         self.container_layout.addWidget(self.chat_input)
