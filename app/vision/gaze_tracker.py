@@ -66,3 +66,13 @@ class GazeAnalyzer:
             
             vertical_ratio = (iris.y - eye_center_y) / eye_height
             horizontal_ratio = (iris.x - eye_center_x) / eye_width
+            
+            if ear < self.EAR_BLINK_TRESHOLD:
+                new_state = "CLOSED"
+            else:
+                if vertical_ratio < self.UP_THRESHOLD:
+                    new_state = "UP"
+                elif vertical_ratio > self.DOWN_THRESHOLD:
+                    new_state = "DOWN"
+                elif horizontal_ratio > self.RIGHT_THRESHOLD:
+                    new_state = "RIGHT"
