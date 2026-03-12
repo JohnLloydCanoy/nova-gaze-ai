@@ -52,6 +52,8 @@ class GazeAnalyzer:
             eye_inner = landmarks[133]
             eye_outer = landmarks[33]
             
-            
+            # Calculate Eye Aspect Ratio (EAR) for inclusive blink detection
             eye_height = self._calculate_distance(eye_top, eye_bottom)
             eye_width = self._calculate_distance(eye_inner, eye_outer)
+            
+            
