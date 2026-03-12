@@ -11,3 +11,4 @@ def run_manual_test():
     if not os.path.exists(test_image_path):
         with open(test_image_path, "wb") as f:
             f.write(b"dummy image data")  # Create an empty file for testing purposes
+    nova_client = NovaAIClient()  
