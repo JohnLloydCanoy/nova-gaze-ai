@@ -28,3 +28,8 @@ class CameraThread(QThread):
                 
                 if event:
                     self.gaze_action_signal.emit(event)
+                    
+                h, w, ch = processed_img.shape
+                bytes_per_line = ch * w
+                qt_image = QImage(processed_img.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+                scaled_qt_image = qt_image.scaled(320, 240, Qt.AspectRatioMode.KeepAspectRatio)
