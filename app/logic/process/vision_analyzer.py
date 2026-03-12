@@ -31,10 +31,14 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
     logger.info(f"Requesting UI interaction analysis for {image_path}")
     
     try:
-        # Submit the image and our strict prompt to the Nova client
-        response_text = nova_client.analyze_vision(
-            image_path=image_path,
-            prompt=system_prompt
+        # 1. Safely read the image file into bytes for the client
+        with open(image_path, "rb") as image_file:
+            image_bytes = image_file.read()
+
+        # 2. Submit the image bytes and our strict prompt to your actual client method
+        response_text = nova_client.chat_with_vision(
+            user_text=system_prompt,
+            image_bytes=image_bytes
         )
         
         # Cleaning the response to ensure it's valid JSON
@@ -48,6 +52,10 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
         
         logger.info(f"Successfully identified {len(interactions)} possible interactions.")
         return interactions
+        
+    except FileNotFoundError:
+        logger.error(f"Screenshot file not found at path: {image_path}")
+        return []
     except json.JSONDecodeError as json_err:
         logger.error(f"Failed to parse Nova AI response as JSON: {json_err}. Raw response: {response_text}")
         return []

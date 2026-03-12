@@ -1,11 +1,12 @@
 import unittest
 from unittest.mock import MagicMock
-from analysis import get_possible_ui_interactions
+from app.logic.process.vision_analyzer import get_possible_ui_interactions
 
 class TestVisionAnalyzer(unittest.TestCase):
     
     def setUp(self):
         self.mock_client = MagicMock()
+        # The variable is defined here
         self.test_image_path = "test_image.png"
         
     def test_success_interaction_parsing(self):
@@ -33,7 +34,8 @@ class TestVisionAnalyzer(unittest.TestCase):
         ```'''
         self.mock_client.analyze_vision.return_value = fake_markdown_response
 
-        result = get_possible_ui_interactions(self.mock_client, self.test_image)
+        # FIXED: Updated to self.test_image_path
+        result = get_possible_ui_interactions(self.mock_client, self.test_image_path)
 
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["element_name"], "Search")
@@ -43,7 +45,8 @@ class TestVisionAnalyzer(unittest.TestCase):
         
         self.mock_client.analyze_vision.return_value = "Sorry, I cannot analyze this image."
         
-        result = get_possible_ui_interactions(self.mock_client, self.test_image)
+        # FIXED: Updated to self.test_image_path
+        result = get_possible_ui_interactions(self.mock_client, self.test_image_path)
         
         self.assertEqual(result, [])
 
