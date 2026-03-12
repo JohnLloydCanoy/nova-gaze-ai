@@ -46,3 +46,6 @@ class TestVisionAnalyzer(unittest.TestCase):
         result = get_possible_ui_interactions(self.mock_client, self.test_image)
         
         self.assertEqual(result, [])
+
+if __name__ == '__main__':
+    unittest.main()
