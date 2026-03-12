@@ -44,3 +44,10 @@ class GazeAnalyzer:
         
         if results.multi_face_landmarks:
             landmarks = results.multi_face_landmarks[0].landmark
+            
+            # Extract Left Eye Landmarks
+            iris = landmarks[473]
+            eye_top = landmarks[159]
+            eye_bottom = landmarks[145]
+            eye_inner = landmarks[133]
+            eye_outer = landmarks[33]
