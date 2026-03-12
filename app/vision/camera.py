@@ -76,3 +76,13 @@ class CameraFeedWidget(QWidget):
         # Camera Feed
         self.image_label = RoundedCameraLabel(self, radius=20) 
         self.layout.addWidget(self.image_label)
+        
+        self.status_overlay = QWidget(self.image_label)
+        self.status_overlay.setGeometry(0, 200, 320, 40)
+        self.status_overlay.setStyleSheet("""
+            QWidget {
+                background-color: rgba(18, 18, 18, 0.7);
+                border-bottom-left-radius: 20px;
+                border-bottom-right-radius: 20px;
+            }
+        """)
