@@ -5,14 +5,16 @@ from app.aws_nova.client import NovaAIClient
 logger = logging.getLogger(__name__)
 
 def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> list[dict]:
-    """_summary_
-
+    """
+    Analyzes a screenshot using AWS Nova AI to determine possible user interactions.
+    
     Args:
-        nova_client (NovaAIClient): _description_
-        image_path (str): _description_
-
+        nova_client: An initialized instance of the NovaAIClient.
+        image_path: The file path to the screenshot to be analyzed.
+        
     Returns:
-        list[dict]: _description_
+        A list of dictionaries containing the interactive elements and their actions.
+        Returns an empty list if analysis fails or parsing errors occur.
     """
     
     system_prompt = ()
