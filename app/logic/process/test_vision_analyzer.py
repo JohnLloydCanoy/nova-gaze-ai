@@ -7,3 +7,5 @@ class TestVisionAnalyzer(unittest.TestCase):
     def setUp(self):
         self.mock_client = MagicMock()
         self.test_image_path = "test_image.png"
+        
+    def test_success_interaction_parsing(self):
