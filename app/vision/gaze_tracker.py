@@ -16,3 +16,5 @@ class GazeAnalyzer:
         
         self.current_state = "center"
         self.state_start_time = time.time()
+        
+        self.gaze_threshold = 0.35
