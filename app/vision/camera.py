@@ -3,3 +3,4 @@ import cv2
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QGraphicsOpacityEffect, QApplication, QHBoxLayout
 from PySide6.QtCore import Qt, QThread, Signal, Slot, QPoint
 from PySide6.QtGui import QImage, QPixmap, QPainter, QPainterPath, QColor, QFont
+from app.vision.gaze_tracker import GazeAnalyzer
