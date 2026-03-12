@@ -108,3 +108,5 @@ class GazeAnalyzer:
                     if elapsed >= 2.0:
                         event_to_emit = "CLICK"
                         self.state_start_time = time.time()
+            status_text = f"GAZE: {new_state}"
+            return frame, event_to_emit, status_text, progress
