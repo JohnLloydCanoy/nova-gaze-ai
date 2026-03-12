@@ -92,3 +92,8 @@ class CameraFeedWidget(QWidget):
         # Layout for the overlay
         self.overlay_layout = QHBoxLayout(self.status_overlay)
         self.overlay_layout.setContentsMargins(15, 0, 15, 0)
+        
+        # Text Label indicating current gaze
+        self.gaze_label = QLabel("GAZE: INIT")
+        self.gaze_label.setStyleSheet("color: #03DAC6; font-weight: bold; font-size: 14px; background: transparent;")
+        self.overlay_layout.addWidget(self.gaze_label)
