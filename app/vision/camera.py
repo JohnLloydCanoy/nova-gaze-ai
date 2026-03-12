@@ -23,3 +23,5 @@ class CameraThread(QThread):
             if ret:
                 cv_img = cv2.flip(cv_img, 1) # Mirror effect
                 rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+                
+                processed_img, event, status_text, progress = self.gaze_analyzer.process_frame(rgb_image)
