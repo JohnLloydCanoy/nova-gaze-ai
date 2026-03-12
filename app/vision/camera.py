@@ -25,3 +25,6 @@ class CameraThread(QThread):
                 rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
                 
                 processed_img, event, status_text, progress = self.gaze_analyzer.process_frame(rgb_image)
+                
+                if event:
+                    self.gaze_action_signal.emit(event)
