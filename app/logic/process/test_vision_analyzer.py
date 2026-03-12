@@ -10,3 +10,9 @@ class TestVisionAnalyzer(unittest.TestCase):
         
     def test_success_interaction_parsing(self):
         """Tests that the function correctly parses a perfect JSON response."""
+        fake_ai_response = """
+        [
+            {"element_name": "Login Button", "action": "Click", "description": "Logs the user in"},
+            {"element_name": "Username Field", "action": "Type", "description": "Enter username here"}
+        ]
+        """
