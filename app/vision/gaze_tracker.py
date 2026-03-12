@@ -84,3 +84,8 @@ class GazeAnalyzer:
                 # If user looked somewhere else; reset the timer immediately
                 self.current_state = new_state
                 self.state_start_time = time.time()
+            else:
+                elapsed = time.time() - self.state_start_time
+                #Process the specific timers you requested
+                if new_state == "CLOSED":
+                    
