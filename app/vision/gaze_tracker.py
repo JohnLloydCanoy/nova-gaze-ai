@@ -29,8 +29,7 @@ class GazeAnalyzer:
         return math.hypot(point1.x - point2.x, point1.y - point2.y)
         
     def process_frame(self, frame):
-        """_summary_
-
-        Args:
-            frame (_type_): _description_
+        """
+        Takes an RGB frame, analyzes the Eye Aspect Ratio, tracks time, 
+        and returns any triggered events based on the user's gaze.
         """
