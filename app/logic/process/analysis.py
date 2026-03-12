@@ -21,7 +21,7 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
         "You are an expert UI/UX automation assistant. Analyze the provided screenshot of a computer screen."
         "Identify the primary ways a user can interact with the current interface."
         "Return the result STRICTLY as a JSON array of objects. Do not include any markdown formatting,"
-        ""
+        "code blocks, or conversational text."
         ""
         ""
         ""
