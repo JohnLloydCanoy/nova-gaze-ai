@@ -18,3 +18,6 @@ def run_manual_test():
     print("\n--- AI Response ---")
     import pprint
     pprint.pprint(results)
+    
+if __name__ == "__main__":
+    run_manual_test()
