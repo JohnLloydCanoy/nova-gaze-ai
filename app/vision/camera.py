@@ -69,5 +69,10 @@ class CameraFeedWidget(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
+        # Main Layout
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Camera Feed
+        self.image_label = RoundedCameraLabel(self, radius=20) 
+        self.layout.addWidget(self.image_label)
