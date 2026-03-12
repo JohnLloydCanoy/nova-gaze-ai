@@ -88,4 +88,7 @@ class GazeAnalyzer:
                 elapsed = time.time() - self.state_start_time
                 #Process the specific timers you requested
                 if new_state == "CLOSED":
-                    
+                    progress = min(elapsed / 5.0, 1.0) # 5 seconds to trigger SCAN
+                    if elapsed >= 5.0:
+                        event_to_emit = "SCAN"
+                        self.state_start_time = time.time() # Reset timer after emitting event
