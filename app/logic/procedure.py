@@ -37,3 +37,5 @@ def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
         if not capture_success or not os.path.exists(temp_screenshot_path):
             logger.error("Procedure aborted: Failed to capture the screen.")
             return []
+        
+        logger.info("[Step 2] Sending capture to AWS Nova AI for analysis...")
