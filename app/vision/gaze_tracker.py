@@ -51,3 +51,7 @@ class GazeAnalyzer:
             eye_bottom = landmarks[145]
             eye_inner = landmarks[133]
             eye_outer = landmarks[33]
+            
+            
+            eye_height = self._calculate_distance(eye_top, eye_bottom)
+            eye_width = self._calculate_distance(eye_inner, eye_outer)
