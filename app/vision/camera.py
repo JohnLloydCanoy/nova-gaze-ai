@@ -15,3 +15,11 @@ class CameraThread(QThread):
         super().__init__()
         self._run_flag = True
         self.gaze_analyzer = GazeAnalyzer()# Initialize the brain
+        
+    def run(self):
+        cap = cv2.VideoCapture(0)
+        while self._run_flag:
+            ret, cv_img = cap.read()
+            if ret:
+                cv_img = cv2.flip(cv_img, 1) # Mirror effect
+                rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
