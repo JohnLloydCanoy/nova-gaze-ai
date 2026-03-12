@@ -16,3 +16,5 @@ class TestVisionAnalyzer(unittest.TestCase):
             {"element_name": "Username Field", "action": "Type", "description": "Enter username here"}
         ]
         """
+        self.mock_client.analyze_vision.return_value = fake_ai_response
+        result = get_possible_ui_interactions(self.mock_client, self.test_image_path)
