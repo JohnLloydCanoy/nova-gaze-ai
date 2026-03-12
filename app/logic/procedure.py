@@ -34,3 +34,6 @@ def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
         
         capture_success = capture_screen(file_path=temp_screenshot_path)
         
+        if not capture_success or not os.path.exists(temp_screenshot_path):
+            logger.error("Procedure aborted: Failed to capture the screen.")
+            return []
