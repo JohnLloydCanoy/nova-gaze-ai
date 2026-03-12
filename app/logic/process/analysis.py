@@ -25,3 +25,10 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
             image_path=image_path,
             prompt=system_prompt
         )
+        
+        # Cleaning the response to ensure it's valid JSON
+        clean_text = response_text.strip()
+        if clean_text.startswith("```json"):
+            clean_text = clean_text[7:]
+        if clean_text.endswith("```"):
+            clean_text = clean_text[:-3]
