@@ -8,3 +8,5 @@ from app.vision.gaze_tracker import GazeAnalyzer
 
 class CameraThread(QThread):
     change_pixmap_signal = Signal(QImage, str, float)
+    
+    gaze_action_signal = Signal(str)
