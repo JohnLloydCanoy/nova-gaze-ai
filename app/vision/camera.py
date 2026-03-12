@@ -102,3 +102,18 @@ class CameraFeedWidget(QWidget):
         self.progress_bg = QWidget()
         self.progress_bg.setFixedSize(100, 8)
         self.progress_bg.setStyleSheet("background-color: #333333; border-radius: 4px;")
+        
+        # Actual moving progress bar
+        self.progress_bar = QWidget(self.progress_bg)
+        self.progress_bar.setFixedSize(0, 8)
+        self.progress_bar.setStyleSheet("background-color: #00E5FF; border-radius: 4px;")
+        
+        self.overlay_layout.addWidget(self.progress_bg, alignment=Qt.AlignmentFlag.AlignRight)
+
+        # Start Video Thread
+        self.thread = CameraThread()
+        self.thread.change_pixmap_signal.connect(self.update_ui)
+        
+        # Listen for the AI actions to print to console (we will wire this to main app later)
+        self.thread.gaze_action_signal.connect(self.on_gaze_action)
+        self.thread.start()
