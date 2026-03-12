@@ -1,11 +1,11 @@
-import time 
-import math 
+import time
+import math
 import cv2
 import mediapipe as mp
-import numpy as np
 
 class GazeAnalyzer:
     def __init__(self):
+        # Initialize MediaPipe Face Mesh
         self.mp_face_mesh = mp.solutions.face_mesh
         self.face_mesh = self.mp_face_mesh.FaceMesh(
             max_num_faces=1,
@@ -14,34 +14,33 @@ class GazeAnalyzer:
             min_tracking_confidence=0.5
         )
         
-        self.current_state = "center"
+        # State tracking
+        self.current_state = "CENTER"
         self.state_start_time = time.time()
         
-        self.gaze_threshold = 0.12
+        # --- THE FIX: Spelled perfectly here ---
+        self.EAR_BLINK_THRESHOLD = 0.12 
         
-        # Normalized gaze thresholds (percentage of eye height/width)
         self.UP_THRESHOLD = -0.15
         self.DOWN_THRESHOLD = 0.18
         self.RIGHT_THRESHOLD = 0.15
-        
+
     def _calculate_distance(self, point1, point2):
-        """"Helper function to calculate the 2D distance between two facial landmarks."""
+        """Helper function to calculate the 2D distance between two facial landmarks."""
         return math.hypot(point1.x - point2.x, point1.y - point2.y)
-        
+
     def process_frame(self, frame):
         """
         Takes an RGB frame, analyzes the Eye Aspect Ratio, tracks time, 
         and returns any triggered events based on the user's gaze.
         """
-        
-        # 
         img_h, img_w = frame.shape[:2]
         results = self.face_mesh.process(frame)
         
         new_state = "CENTER"
         event_to_emit = None
         progress = 0.0
-        
+
         if results.multi_face_landmarks:
             landmarks = results.multi_face_landmarks[0].landmark
             
@@ -51,23 +50,26 @@ class GazeAnalyzer:
             eye_bottom = landmarks[145]
             eye_inner = landmarks[133]
             eye_outer = landmarks[33]
-            
-            # Calculate Eye Aspect Ratio (EAR) for inclusive blink detection
+
+            # 1. Calculate Eye Aspect Ratio (EAR)
             eye_height = self._calculate_distance(eye_top, eye_bottom)
             eye_width = self._calculate_distance(eye_inner, eye_outer)
             
             if eye_width == 0:
-                eye_width = 0.0001
+                eye_width = 0.001
                 
             ear = eye_height / eye_width
-            
+
+            # 2. Calculate Normalized Gaze Direction 
             eye_center_y = (eye_top.y + eye_bottom.y) / 2
             eye_center_x = (eye_inner.x + eye_outer.x) / 2
             
             vertical_ratio = (iris.y - eye_center_y) / eye_height
             horizontal_ratio = (iris.x - eye_center_x) / eye_width
-            
-            if ear < self.EAR_BLINK_TRESHOLD:
+
+            # 3. Determine the current physical state
+            # --- THE FIX: Matches perfectly here ---
+            if ear < self.EAR_BLINK_THRESHOLD:
                 new_state = "CLOSED"
             else:
                 if vertical_ratio < self.UP_THRESHOLD:
@@ -76,37 +78,44 @@ class GazeAnalyzer:
                     new_state = "DOWN"
                 elif horizontal_ratio > self.RIGHT_THRESHOLD:
                     new_state = "RIGHT"
-            
+
+            # Draw a small yellow dot on the iris for UI visual feedback
             cx, cy = int(iris.x * img_w), int(iris.y * img_h)
             cv2.circle(frame, (cx, cy), 3, (0, 229, 255), -1)
+
+        # --- TIME MANAGEMENT LOGIC ---
+        if new_state != self.current_state:
+            # The user looked somewhere else; reset the timer immediately
+            self.current_state = new_state
+            self.state_start_time = time.time()
             
-            if new_state != self.current_state:
-                # If user looked somewhere else; reset the timer immediately
-                self.current_state = new_state
-                self.state_start_time = time.time()
-            else:
-                elapsed = time.time() - self.state_start_time
-                #Process the specific timers you requested
-                if new_state == "CLOSED":
-                    progress = min(elapsed / 5.0, 1.0) # 5 seconds to trigger SCAN
-                    if elapsed >= 5.0:
-                        event_to_emit = "SCAN"
-                        self.state_start_time = time.time() # Reset timer after emitting event
-                elif new_state == "UP":
-                    progress = min(elapsed / 3.0, 1.0) # 3 seconds to SELECT UP
-                    if elapsed >= 3.0:
-                        event_to_emit = "SELECT_UP"
-                        self.state_start_time = time.time()
-                elif new_state == "DOWN":
-                    progress = min(elapsed / 3.0, 1.0) # 3 seconds to SELECT DOWN
-                    if elapsed >= 3.0:
-                        event_to_emit = "SELECT_DOWN"
-                        self.state_start_time = time.time()
-                        
-                elif new_state == "RIGHT":
-                    progress = min(elapsed / 2.0, 1.0) # 2 seconds to CLICK (Faster for UX)
-                    if elapsed >= 2.0:
-                        event_to_emit = "CLICK"
-                        self.state_start_time = time.time()
-            status_text = f"GAZE: {new_state}"
-            return frame, event_to_emit, status_text, progress
+        else:
+            elapsed = time.time() - self.state_start_time
+            
+            # Process the specific timers
+            if new_state == "CLOSED":
+                progress = min(elapsed / 5.0, 1.0) # 5 seconds to trigger SCAN
+                if elapsed >= 5.0:
+                    event_to_emit = "SCAN"
+                    self.state_start_time = time.time()
+                    
+            elif new_state == "UP":
+                progress = min(elapsed / 3.0, 1.0) # 3 seconds to SELECT UP
+                if elapsed >= 3.0:
+                    event_to_emit = "SELECT_UP"
+                    self.state_start_time = time.time()
+                    
+            elif new_state == "DOWN":
+                progress = min(elapsed / 3.0, 1.0) # 3 seconds to SELECT DOWN
+                if elapsed >= 3.0:
+                    event_to_emit = "SELECT_DOWN"
+                    self.state_start_time = time.time()
+                    
+            elif new_state == "RIGHT":
+                progress = min(elapsed / 2.0, 1.0) # 2 seconds to CLICK
+                if elapsed >= 2.0:
+                    event_to_emit = "CLICK"
+                    self.state_start_time = time.time()
+
+        status_text = f"GAZE: {new_state}"
+        return frame, event_to_emit, status_text, progress

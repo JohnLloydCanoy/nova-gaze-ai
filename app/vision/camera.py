@@ -117,3 +117,39 @@ class CameraFeedWidget(QWidget):
         # Listen for the AI actions to print to console (we will wire this to main app later)
         self.thread.gaze_action_signal.connect(self.on_gaze_action)
         self.thread.start()
+        
+    @Slot(QImage, str, float)
+    def update_ui(self, qt_image, status_text, progress):
+        """Updates the video feed, the text, and the loading bar length."""
+        # 1. Update Video
+        self.image_label.setPixmap(QPixmap.fromImage(qt_image))
+        
+        # 2. Update Text
+        self.gaze_label.setText(status_text)
+        
+        # 3. Update Progress Bar Width (Max width is 100px)
+        new_width = int(100 * progress)
+        self.progress_bar.setFixedSize(new_width, 8)
+        
+        # Color shift for danger/closing eyes vs normal action
+        if "CLOSED" in status_text:
+            self.progress_bar.setStyleSheet("background-color: #BB86FC; border-radius: 4px;")
+        else:
+            self.progress_bar.setStyleSheet("background-color: #00E5FF; border-radius: 4px;")
+
+    @Slot(str)
+    def on_gaze_action(self, action):
+        """Temporary test function. This will be wired to your chat panel next."""
+        print(f"🔥 GAZE EVENT TRIGGERED: {action} 🔥")
+
+    def shutdown(self):
+        self.thread.stop()
+
+
+# --- Execution Block to test the app ---
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    widget = CameraFeedWidget()
+    widget.show()
+    app.aboutToQuit.connect(widget.shutdown)
+    sys.exit(app.exec())
