@@ -9,3 +9,4 @@ class TestVisionAnalyzer(unittest.TestCase):
         self.test_image_path = "test_image.png"
         
     def test_success_interaction_parsing(self):
+        """Tests that the function correctly parses a perfect JSON response."""
