@@ -58,3 +58,7 @@ class GazeAnalyzer:
             
             if eye_width == 0:
                 eye_width = 0.0001
+                
+            ear = eye_height / eye_width
+            
+            
