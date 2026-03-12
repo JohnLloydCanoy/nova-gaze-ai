@@ -14,13 +14,14 @@ class GazeAnalyzer:
             min_tracking_confidence=0.5
         )
         
+        self.session_active = False  
+        
         # State tracking
         self.current_state = "CENTER"
         self.state_start_time = time.time()
         
-        # --- THE FIX: Spelled perfectly here ---
+        # Forgiving Thresholds
         self.EAR_BLINK_THRESHOLD = 0.12 
-        
         self.UP_THRESHOLD = -0.15
         self.DOWN_THRESHOLD = 0.18
         self.RIGHT_THRESHOLD = 0.15
@@ -68,7 +69,6 @@ class GazeAnalyzer:
             horizontal_ratio = (iris.x - eye_center_x) / eye_width
 
             # 3. Determine the current physical state
-            # --- THE FIX: Matches perfectly here ---
             if ear < self.EAR_BLINK_THRESHOLD:
                 new_state = "CLOSED"
             else:
@@ -79,9 +79,10 @@ class GazeAnalyzer:
                 elif horizontal_ratio > self.RIGHT_THRESHOLD:
                     new_state = "RIGHT"
 
-            # Draw a small yellow dot on the iris for UI visual feedback
+            # Visual UI Feedback: The dot on their eye turns Cyan when active, Gray when sleeping
             cx, cy = int(iris.x * img_w), int(iris.y * img_h)
-            cv2.circle(frame, (cx, cy), 3, (0, 229, 255), -1)
+            dot_color = (0, 229, 255) if self.session_active else (150, 150, 150)
+            cv2.circle(frame, (cx, cy), 3, dot_color, -1)
 
         # --- TIME MANAGEMENT LOGIC ---
         if new_state != self.current_state:
@@ -92,30 +93,37 @@ class GazeAnalyzer:
         else:
             elapsed = time.time() - self.state_start_time
             
-            # Process the specific timers
+            # 1. The "Ignition Switch" (Can happen at any time)
             if new_state == "CLOSED":
                 progress = min(elapsed / 5.0, 1.0) # 5 seconds to trigger SCAN
                 if elapsed >= 5.0:
                     event_to_emit = "SCAN"
+                    self.session_active = True  # <--- WAKE UP THE SYSTEM
                     self.state_start_time = time.time()
                     
-            elif new_state == "UP":
-                progress = min(elapsed / 3.0, 1.0) # 3 seconds to SELECT UP
-                if elapsed >= 3.0:
-                    event_to_emit = "SELECT_UP"
-                    self.state_start_time = time.time()
-                    
-            elif new_state == "DOWN":
-                progress = min(elapsed / 3.0, 1.0) # 3 seconds to SELECT DOWN
-                if elapsed >= 3.0:
-                    event_to_emit = "SELECT_DOWN"
-                    self.state_start_time = time.time()
-                    
-            elif new_state == "RIGHT":
-                progress = min(elapsed / 2.0, 1.0) # 2 seconds to CLICK
-                if elapsed >= 2.0:
-                    event_to_emit = "CLICK"
-                    self.state_start_time = time.time()
+            # 2. The Gaze Commands (ONLY run if the session is active!)
+            elif self.session_active:
+                if new_state == "UP":
+                    progress = min(elapsed / 3.0, 1.0) 
+                    if elapsed >= 3.0:
+                        event_to_emit = "SELECT_UP"
+                        self.state_start_time = time.time()
+                        
+                elif new_state == "DOWN":
+                    progress = min(elapsed / 3.0, 1.0) 
+                    if elapsed >= 3.0:
+                        event_to_emit = "SELECT_DOWN"
+                        self.state_start_time = time.time()
+                        
+                elif new_state == "RIGHT":
+                    progress = min(elapsed / 2.0, 1.0) 
+                    if elapsed >= 2.0:
+                        event_to_emit = "CLICK"
+                        self.session_active = False # <--- PUT SYSTEM BACK TO SLEEP AFTER CLICK
+                        self.state_start_time = time.time()
 
-        status_text = f"GAZE: {new_state}"
+        # Update the UI text so the user knows if the system is awake or asleep
+        mode_text = "ACTIVE" if self.session_active else "AWAITING SCAN"
+        status_text = f"GAZE: {new_state} [{mode_text}]"
+        
         return frame, event_to_emit, status_text, progress

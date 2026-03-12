@@ -27,6 +27,9 @@ class NovaGazeOverlay(QMainWindow):
         self.camera_widget = CameraFeedWidget(self)
         self.camera_widget.move(20, 20)
         
+        # Wire the camera's gaze events to our master overlay
+        self.camera_widget.thread.gaze_action_signal.connect(self.handle_gaze_action)
+        
         self.top_tab = TopControlTab(self)
         self.top_tab.close_requested.connect(QApplication.instance().quit)
         
@@ -42,23 +45,49 @@ class NovaGazeOverlay(QMainWindow):
         self.side_panel.send_message_requested.connect(self.handle_ai_chat)
         self.side_panel.action_selected.connect(self.handle_button_click)
 
+    # --- FUNCTION 1: Handles Eye Movements from the Camera ---
+    def handle_gaze_action(self, action: str):
+        """Translates eye movements into application commands."""
+        
+        if action == "SCAN":
+            self.side_panel.chat_display.append('<span style="color: #00E5FF;"><b>System:</b> 5-Second eye closure detected. Initiating Scan...</span>')
+            # Trigger the text chat logic below as if the user typed "scan"
+            self.handle_ai_chat("scan")
+            
+        elif action == "SELECT_UP":
+            self.side_panel.chat_display.append('<span style="color: #03DAC6;"><b>System:</b> Moving selection UP...</span>')
+            # TODO: Add logic to highlight the next button up
+            
+        elif action == "SELECT_DOWN":
+            self.side_panel.chat_display.append('<span style="color: #03DAC6;"><b>System:</b> Moving selection DOWN...</span>')
+            # TODO: Add logic to highlight the next button down
+            
+        elif action == "CLICK":
+            self.side_panel.chat_display.append('<span style="color: #FF5252;"><b>System:</b> Executing CLICK on selection!</span>')
+            # TODO: Add logic to physically click the highlighted button
+
+    # --- FUNCTION 2: Handles Text Input and the Actual AI Scan ---
     def handle_ai_chat(self, text):
+        """Handles text commands or triggered scans."""
         text_lower = text.lower()
+        
         if "scan" in text_lower or "look" in text_lower:
             self.side_panel.chat_display.append('<span style="color: #BB86FC;"><b>Nova:</b> Scanning your screen...</span>')
             self.hide()
             QApplication.processEvents()
+            
             try:
+                # Trigger the scan
                 real_ai_data = execute_screen_analysis_procedure(self.nova)
+                
+                # --- NEW DEBUG LINES ---
+                print("\n=== DEBUG: WHAT NOVA RETURNED ===")
+                print(real_ai_data)
+                print("=================================\n")
+                
             finally:
                 self.show()
                 QApplication.processEvents()
-                
-            if real_ai_data:
-                self.side_panel.chat_display.append(f'<span style="color: #03DAC6;"><b>Nova:</b> Found {len(real_ai_data)} actions.</span>')
-                self.side_panel.generate_action_buttons(real_ai_data)
-            else:
-                self.side_panel.chat_display.append('<span style="color: #FF5252;"><b>Nova:</b> No clear interactions found.</span>')
         else:
             self.hide()
             QApplication.processEvents()
@@ -73,6 +102,7 @@ class NovaGazeOverlay(QMainWindow):
             if hasattr(self.top_tab, 'add_assistant_message'):
                 self.top_tab.add_assistant_message(reply)
 
+    # --- FUNCTION 3: Handles the Final Button Click Execution ---
     def handle_button_click(self, action_data: dict):
         action = action_data.get('action', 'Unknown Action')
         element = action_data.get('element_name', 'Unknown Element')
