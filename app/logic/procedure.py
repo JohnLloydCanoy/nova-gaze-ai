@@ -26,3 +26,7 @@ def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
     ui_interactions = []
     
     logger.info("=== Starting Screen Analysis Procedure ===")
+    
+    # Steps on the main window should be passed in as an argument or handled by the caller
+    
+    try:
