@@ -5,3 +5,4 @@ import mediapipe as mp
 import numpy as np
 
 class GazeAnalyzer:
+    def __init__(self):
