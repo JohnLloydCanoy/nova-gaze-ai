@@ -22,3 +22,18 @@ class TestVisionAnalyzer(unittest.TestCase):
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0]["element_name"], "Login Button")
         self.assertEqual(result[1]["action"], "Type")
+        
+    def test_markdown_stripping(self):
+        """Tests that the function survives when the AI wraps JSON in markdown blocks."""
+        
+        fake_markdown_response = '''```json
+        [
+            {"element_name": "Search", "action": "Click", "description": "Search"}
+        ]
+        ```'''
+        self.mock_client.analyze_vision.return_value = fake_markdown_response
+
+        result = get_possible_ui_interactions(self.mock_client, self.test_image)
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["element_name"], "Search")
