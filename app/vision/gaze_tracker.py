@@ -79,3 +79,5 @@ class GazeAnalyzer:
             
             cx, cy = int(iris.x * img_w), int(iris.y * img_h)
             cv2.circle(frame, (cx, cy), 3, (0, 229, 255), -1)
+            
+            if new_state != self.current_state:
