@@ -167,13 +167,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     panel = ChatSidePanel()
     
-    # --- TEST THE DYNAMIC BUTTONS ---
-    test_data = [
-        {"action": "Click", "description": "Access file-related options.", "element_name": "File Menu"},
-        {"action": "Click", "description": "Execute the current script.", "element_name": "Run Button"}
-    ]
-    panel.generate_action_buttons(test_data)
-    # --------------------------------
     
     panel.show()
     sys.exit(app.exec())
