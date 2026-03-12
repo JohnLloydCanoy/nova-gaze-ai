@@ -39,3 +39,8 @@ def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
             return []
         
         logger.info("[Step 2] Sending capture to AWS Nova AI for analysis...")
+        
+        ui_interactions = get_possible_ui_interactions(
+            nova_client=nova_client, 
+            image_path=temp_screenshot_path
+        )
