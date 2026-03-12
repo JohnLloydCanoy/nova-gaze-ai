@@ -13,3 +13,6 @@ class GazeAnalyzer:
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5
         )
+        
+        self.current_state = "center"
+        self.state_start_time = time.time()
