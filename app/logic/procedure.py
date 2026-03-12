@@ -30,3 +30,7 @@ def execute_screen_analysis_procedure(nova_client: NovaAIClient) -> List[Dict]:
     # Steps on the main window should be passed in as an argument or handled by the caller
     
     try:
+        logger.info("[Step 1] Triggering screen capture...")
+        
+        capture_success = capture_screen(file_path=temp_screenshot_path)
+        

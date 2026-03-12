@@ -9,7 +9,7 @@ from app.aws_nova.client import NovaAIClient
 
 logger = logging.getLogger(__name__)
 
-def process_chat_with_screenshot(
+def capture_screen(
     main_window, 
     nova_client: NovaAIClient, 
     chat_message: str, 
