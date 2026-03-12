@@ -16,7 +16,7 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
         A list of dictionaries containing the interactive elements and their actions.
         Returns an empty list if analysis fails or parsing errors occur.
     """
-    
+    # Define a strict system prompt to guide Nova AI's analysis towards identifying actionable UI elements.
     system_prompt = ()
     
     logger.info(f"Requesting UI interaction analysis for {image_path}")
