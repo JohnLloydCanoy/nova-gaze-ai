@@ -1,12 +1,11 @@
-# This is a function where we take a screen shot of the user's screen and save it to a file. We will use the pyautogui library to take the screen shot and save it to a file. We will also use the screenshot to be submitted to the Nova client for analysis. This is a crucial part of the app as it allows us to capture the user's screen and provide insights based on the visual data. We will also briefly hide the app window to ensure we capture a clean screenshot of the desktop without our own interface in it. this function will be called when the user submits a chat message, allowing us to provide context-aware responses based on the current state of the user's screen. 
 import os
 import time
 import logging
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QBuffer, QIODevice
+from PyQt6.QtCore import QBuffer, QIODevice 
 import pyautogui
-from app.aws_nova.client import NovaAIClient
 
+from app.aws_nova.client import NovaAIClient
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +15,7 @@ def process_chat_with_screenshot(
     chat_message: str, 
     file_path: str = "temp_screenshot.png",
     cleanup_after: bool = True
-    ) -> dict | None:
+) -> dict | None:
     """
     Hides the main app window, captures the desktop, saves it to a file, 
     and submits it to Nova AI along with the user's message.
@@ -31,8 +30,51 @@ def process_chat_with_screenshot(
     Returns:
         The response from the Nova AI client, or None if it fails.
     """
-    
     try:
+        # Hide the application window cleanly
         main_window.hide()
+        
+        # Force the Qt event loop to process the hide event immediately
         QApplication.processEvents()
         
+        # Brief pause to ensure the OS compositor has fully cleared the window visually
+        time.sleep(0.2) 
+        
+        # Capture the screen and save to disk
+        logger.info(f"Capturing screenshot to {file_path}")
+        screenshot = pyautogui.screenshot()
+        screenshot.save(file_path)
+        
+    except Exception as capture_error:
+        logger.error(f"Failed to capture screenshot: {capture_error}")
+        # Make sure the window comes back if capturing fails
+        main_window.show()
+        raise RuntimeError(f"Screenshot capture failed: {capture_error}")
+
+    try:
+        # Restore the application window as quickly as possible for good UX
+        main_window.show()
+        QApplication.processEvents()
+        
+        # Submit to Nova client
+        # (Note: adjust '.analyze_vision' to match your actual client method)
+        logger.info("Submitting screenshot and message to Nova AI.")
+        response = nova_client.analyze_vision(
+            image_path=file_path,
+            prompt=chat_message
+        )
+        
+        return response
+        
+    except Exception as api_error:
+        logger.error(f"Failed to communicate with Nova AI: {api_error}")
+        raise
+        
+    finally:
+        # Security & Scalability: Clean up the file so we don't leak user data or fill up the disk
+        if cleanup_after and os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+                logger.debug(f"Cleaned up temporary file: {file_path}")
+            except OSError as cleanup_error:
+                logger.warning(f"Could not remove temporary screenshot {file_path}: {cleanup_error}")
