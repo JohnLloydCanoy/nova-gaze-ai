@@ -77,6 +77,8 @@ class CameraFeedWidget(QWidget):
         self.image_label = RoundedCameraLabel(self, radius=20) 
         self.layout.addWidget(self.image_label)
         
+        
+        # --- NEW: Modern Gaze Status UI Overlay ---
         self.status_overlay = QWidget(self.image_label)
         self.status_overlay.setGeometry(0, 200, 320, 40)
         self.status_overlay.setStyleSheet("""
@@ -86,3 +88,7 @@ class CameraFeedWidget(QWidget):
                 border-bottom-right-radius: 20px;
             }
         """)
+        
+        # Layout for the overlay
+        self.overlay_layout = QHBoxLayout(self.status_overlay)
+        self.overlay_layout.setContentsMargins(15, 0, 15, 0)
