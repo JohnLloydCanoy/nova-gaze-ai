@@ -33,3 +33,11 @@ class GazeAnalyzer:
         Takes an RGB frame, analyzes the Eye Aspect Ratio, tracks time, 
         and returns any triggered events based on the user's gaze.
         """
+        
+        # 
+        img_h, img_w = frame.shape[:2]
+        results = self.face_mesh.process(frame)
+        
+        new_state = "CENTER"
+        event_to_emit = None
+        progress = 0.0
