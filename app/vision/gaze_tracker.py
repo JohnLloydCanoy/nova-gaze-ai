@@ -76,3 +76,6 @@ class GazeAnalyzer:
                     new_state = "DOWN"
                 elif horizontal_ratio > self.RIGHT_THRESHOLD:
                     new_state = "RIGHT"
+            
+            cx, cy = int(iris.x * img_w), int(iris.y * img_h)
+            cv2.circle(frame, (cx, cy), 3, (0, 229, 255), -1)
