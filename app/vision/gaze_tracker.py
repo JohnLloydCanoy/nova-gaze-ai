@@ -24,3 +24,5 @@ class GazeAnalyzer:
         self.DOWN_THRESHOLD = 0.18
         self.RIGHT_THRESHOLD = 0.15
         
+    def _calculate_distance(self, point1, point2):
+        return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
