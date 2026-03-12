@@ -12,3 +12,4 @@ def run_manual_test():
         with open(test_image_path, "wb") as f:
             f.write(b"dummy image data")  # Create an empty file for testing purposes
     nova_client = NovaAIClient()  
+    print("Sending request to Nova AI...")
