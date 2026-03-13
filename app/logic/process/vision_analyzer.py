@@ -6,6 +6,78 @@ from app.aws_nova.client import NovaAIClient
 logger = logging.getLogger(__name__)
 
 
+def _extract_json_payload(response_text: str):
+    """Extract the first decodable JSON payload (list or object) from model text."""
+    if not response_text:
+        return None
+
+    text = response_text.strip()
+    decoder = json.JSONDecoder()
+
+    # Fast path: whole response is valid JSON.
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+
+    # Try markdown code fences first if present.
+    fence_matches = re.findall(
+        r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
+    for chunk in fence_matches:
+        chunk = chunk.strip()
+        try:
+            return json.loads(chunk)
+        except json.JSONDecodeError:
+            continue
+
+    # Fallback: scan text for first decodable JSON object/array.
+    for index, ch in enumerate(text):
+        if ch not in "[{":
+            continue
+        try:
+            payload, _ = decoder.raw_decode(text[index:])
+            return payload
+        except json.JSONDecodeError:
+            continue
+
+    return None
+
+
+def _normalize_interaction_payload(payload) -> list[dict]:
+    """Normalize model payload into list[dict] interactions."""
+    interactions = []
+
+    if isinstance(payload, list):
+        interactions = payload
+    elif isinstance(payload, dict):
+        list_keys = (
+            "interactions",
+            "ui_interactions",
+            "possible_interactions",
+            "actions",
+            "elements",
+            "targets",
+        )
+        for key in list_keys:
+            value = payload.get(key)
+            if isinstance(value, list):
+                interactions = value
+                break
+
+        if not interactions and all(k in payload for k in ("element_name", "action")):
+            interactions = [payload]
+
+    if not isinstance(interactions, list):
+        return []
+
+    validated: list[dict] = []
+    for item in interactions:
+        if isinstance(item, dict):
+            validated.append(item)
+
+    return validated
+
+
 def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> list[dict]:
     """
     Analyzes a screenshot using AWS Nova AI to determine possible user interactions.
@@ -37,39 +109,21 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
             image_bytes=image_bytes
         )
 
-        # --- THE BULLETPROOF REGEX FILTER ---
-        # Finds everything from the first '[' to the last ']'
-        match = re.search(r'\[.*\]', response_text, re.DOTALL)
+        payload = _extract_json_payload(response_text)
+        interactions = _normalize_interaction_payload(payload)
 
-        if match:
-            clean_json_str = match.group(0)
-            interactions = json.loads(clean_json_str)
-            # Keep only interaction objects that contain at least a callable target.
-            if isinstance(interactions, list):
-                validated = []
-                for item in interactions:
-                    if not isinstance(item, dict):
-                        continue
-                    if "center_x" in item and "center_y" in item:
-                        validated.append(item)
-                    else:
-                        # Preserve legacy responses so UI can still display options.
-                        validated.append(item)
-                interactions = validated
+        if interactions:
             logger.info(
                 f"Successfully identified {len(interactions)} possible interactions.")
             return interactions
-        else:
-            logger.error("Could not find a JSON array in Nova's response.")
-            logger.debug(f"Raw response was: {response_text}")
-            return []
+
+        logger.error(
+            "Could not extract valid interaction objects from Nova response.")
+        logger.warning("Response preview: %s", (response_text or "")[:500])
+        return []
 
     except FileNotFoundError:
         logger.error(f"Screenshot file not found at path: {image_path}")
-        return []
-    except json.JSONDecodeError as json_err:
-        logger.error(
-            f"Failed to parse Nova AI response as JSON: {json_err}. Raw response: {response_text}")
         return []
     except Exception as e:
         logger.error(f"An error occurred during interaction analysis: {e}")
