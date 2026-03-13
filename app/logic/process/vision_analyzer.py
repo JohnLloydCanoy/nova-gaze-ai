@@ -85,6 +85,8 @@ def get_possible_ui_interactions(nova_client: NovaAIClient, image_path: str) -> 
     system_prompt = (
         "You are an expert UI/UX automation assistant. Analyze the provided screenshot of a computer screen. "
         "Identify the primary ways a user can interact with the current interface. "
+        "Prioritize controls that belong to the active application content area. "
+        "Do not return operating-system shell controls such as Start menu/button, Taskbar, desktop background, system tray, or clock. "
         "Return the result STRICTLY as a JSON array of objects. Do not include any markdown formatting, "
         "code blocks, or conversational text. "
         "Each object must have the following keys: "

@@ -19,6 +19,17 @@ MIN_REQUIRED_CLICKS = 3
 MAX_SCAN_ROUNDS = 10
 POST_CLICK_DELAY_SECONDS = 1.8
 
+BLOCKED_TARGET_TOKENS = (
+    "start menu",
+    "start button",
+    "start",
+    "taskbar",
+    "notification area",
+    "system tray",
+    "desktop background",
+    "windows logo",
+)
+
 
 def _normalize_text(value: str) -> str:
     return (value or "").strip().lower()
@@ -41,6 +52,13 @@ def _is_click_like_action(action: str) -> bool:
     return any(token in action_norm for token in click_tokens)
 
 
+def _is_blocked_target(interaction: Dict) -> bool:
+    element_name = _normalize_text(str(interaction.get("element_name", "")))
+    description = _normalize_text(str(interaction.get("description", "")))
+    haystack = f"{element_name} {description}"
+    return any(token in haystack for token in BLOCKED_TARGET_TOKENS)
+
+
 def _interaction_signature(interaction: Dict) -> Tuple[str, float, float]:
     element_name = _normalize_text(str(interaction.get("element_name", "")))
     center_x = _to_float(interaction.get("center_x"))
@@ -59,6 +77,9 @@ def _score_interaction(interaction: Dict) -> int:
 
     haystack = f"{element_name} {description} {action_name}"
     score = 0
+
+    if _is_blocked_target(interaction):
+        return -999
 
     if _has_coordinates(interaction):
         score += 5
@@ -88,6 +109,8 @@ def _pick_best_interaction(interactions: List[Dict], used_signatures: Set[Tuple[
     candidates = []
     for interaction in interactions:
         if not _has_coordinates(interaction):
+            continue
+        if _is_blocked_target(interaction):
             continue
         sig = _interaction_signature(interaction)
         if sig in used_signatures:
