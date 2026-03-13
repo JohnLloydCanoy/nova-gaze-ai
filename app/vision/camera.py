@@ -30,6 +30,7 @@ class CameraThread(QThread):
     def __init__(self):
         super().__init__()
         self._run_flag = True
+        self.gaze_analyzer = GazeAnalyzer()# Initialize the brain
         
         # Initialize the eye tracker
         self.eye_tracker = EyeTracker()
@@ -146,7 +147,10 @@ class CameraFeedWidget(QWidget):
         
         # Start camera thread
         self.thread = CameraThread()
-        self.thread.change_pixmap_signal.connect(self.update_image)
+        self.thread.change_pixmap_signal.connect(self.update_ui)
+        
+        # Listen for the AI actions to print to console (we will wire this to main app later)
+        self.thread.gaze_action_signal.connect(self.on_gaze_action)
         self.thread.start()
         
         print("[CameraFeedWidget] ✅ Initialized and started")
